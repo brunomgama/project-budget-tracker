@@ -8,43 +8,61 @@ export default function HomePage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/project')
+        fetch("/api/project")
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error('Failed to fetch data');
+                    throw new Error("Failed to fetch data");
                 }
                 return response.json();
             })
             .then((data) => setData(data))
             .catch((error) => {
-                console.error('Error fetching data:', error);
+                console.error("Error fetching data:", error);
                 setError(error.message);
             });
     }, []);
 
     if (error) {
-        return <p>Error: {error}</p>;
+        return (
+            <p className="text-center text-sm font-medium" style={{ color: "var(--color-error)" }}>
+                Error: {error}
+            </p>
+        );
     }
 
     if (!data) {
-        return <p>Loading...</p>;
+        return (
+            <p className="text-center text-sm font-medium" style={{ color: "var(--color-secondaryText)" }}>
+                Loading...
+            </p>
+        );
     }
 
     return (
         <div>
-            <h1>Project Budget Tracker</h1>
+            <h1 className="text-left text-3xl font-bold m-6" style={{ color: "var(--color-darker)" }}>
+                Project Budget Tracker
+            </h1>
+
             <section>
-                <h2>Projects</h2>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: "var(--color-dark)" }}>
+                    Projects
+                </h2>
                 {data.projects.length === 0 ? (
-                    <p>No projects found.</p>
+                    <p style={{ color: "var(--color-secondaryText)" }}>
+                        No projects found.
+                    </p>
                 ) : (
-                    <ul>
+                    <ul className="list-disc pl-6" style={{color: "var(--color-darker)"}}>
                         {data.projects.map((project) => (
-                            <li key={project.id}>{project.name}</li>
+                            <li key={project.id} className="mb-2">
+                                {project.name}
+                            </li>
                         ))}
                     </ul>
                 )}
             </section>
         </div>
     );
+
 }
