@@ -66,26 +66,12 @@ export default function Projects() {
     };
 
     const handleSelectItem = (id: number) => {
-        const newSelectedItems = new Set(selectedItems)
-
-        if(newSelectedItems.has(id)) {
-            newSelectedItems.delete(id);
-        }
-        else {
-            newSelectedItems.add(id);
-        }
-
-        setSelectedItems(newSelectedItems)
-    }
-
-    const handleSelectAll = () => {
-        if (selectedItems.size === filteredData.length) {
-            setSelectedItems(new Set());
+        if (selectedItems.has(id)) {
+            setSelectedItems(new Set())
         } else {
-            const allIds = new Set(filteredData.map((item) => item.id));
-            setSelectedItems(allIds);
+            setSelectedItems(new Set([id]))
         }
-    };
+    }
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -113,7 +99,6 @@ export default function Projects() {
                     onSort={handleSort}
                     selectedItems={selectedItems}
                     onSelectItem={handleSelectItem}
-                    onSelectAll={handleSelectAll}
                 />
             </div>
 

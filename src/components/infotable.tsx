@@ -7,25 +7,20 @@ interface Header {
 }
 
 export default function InfoTable(
-    {data, headers, onSort, selectedItems, onSelectItem, onSelectAll}:
+    {data, headers, onSort, selectedItems, onSelectItem}:
     {
         data: Record<string, any>[];
         headers: Header[];
         onSort: (key: string) => void;
         selectedItems: Set<number>;
         onSelectItem: (id: number) => void;
-        onSelectAll: () => void;
     }) {
     return (
         <Table className="min-w-full">
             <TableHeader>
                 <TableRow>
                     <TableHead>
-                        <input
-                            type="checkbox"
-                            checked={data.length > 0 && selectedItems.size === data.length}
-                            onChange={onSelectAll}
-                        />
+                        {/* Empty header for checkbox */}
                     </TableHead>
                     {headers.map((header) => (
                         <TableHead key={header.field} className="cursor-pointer" onClick={() => onSort(header.field)}>
