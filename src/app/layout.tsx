@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/sidebar";
+import Header from "@/components/header";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -21,11 +22,7 @@ export const metadata: Metadata = {
     },
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout({children}: Readonly<{ children: React.ReactNode; }>) {
     return (
         <html lang="en">
         <body
@@ -36,10 +33,11 @@ export default function RootLayout({
             }}
         >
         <div className="flex h-screen">
-            {/* Sidebar */}
             <Sidebar />
-            {/* Main Content */}
-            <main className="flex-1 overflow-auto">{children}</main>
+            <div className="flex flex-col flex-1">
+                <Header />
+                <main className="flex-1 overflow-auto p-6">{children}</main>
+            </div>
         </div>
         </body>
         </html>

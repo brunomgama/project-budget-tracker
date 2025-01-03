@@ -22,7 +22,9 @@ db.serialize(() => {
     // Insert sample data into Budget table
     db.run(`
         INSERT INTO budget (name, totalamount, projectid) VALUES
-            ('Alpha Budget', 50000, 1);
+            ('Alpha Budget', 50000, 1),
+            ('Beta Budget', 10000, 1),
+            ('Gamma Budget', 250, 1);
     `);
 
     // Insert sample data into Category table
@@ -40,7 +42,8 @@ db.serialize(() => {
     // Insert sample data into Expense table
     db.run(`
         INSERT INTO expense (amount, description, date, budgetid) VALUES
-            (1500, 'Initial consultancy fee', '2025-01-02', 1);
+            (1500.23, 'Initial consultancy fee', '2025-01-02', 1),
+            (2000.12, 'Initial consultancy fee', '2025-01-02', 1);
     `);
 
     // Insert sample data into ExpenseCategory linking table
