@@ -27,6 +27,10 @@ export default function Projects() {
     const itemsPerPage = 15;
 
     useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = () => {
         fetch("/api/expense")
             .then((response) => {
                 if (!response.ok) {
@@ -37,12 +41,13 @@ export default function Projects() {
             .then((data: APIExpenseResponse) => {
                 setData(data.expenses);
                 setFilteredData(data.expenses);
+                setSelectedItems(new Set());
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
                 setError(error.message);
             });
-    }, []);
+    };
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
@@ -98,7 +103,7 @@ export default function Projects() {
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             <div className="flex justify-between">
                 <SearchBar searchQuery={searchQuery} onSearch={handleSearch} />
-                <TableActionButtons />
+                <TableActionButtons selectedItems={selectedItems} refreshData={fetchData}/>
             </div>
 
             <div className="flex-grow overflow-auto">

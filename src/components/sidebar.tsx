@@ -23,8 +23,6 @@ const menuItems = [
 export default function Sidebar() {
     const pathname = usePathname()
 
-    console.log(pathname)
-
     return (
         <aside className="w-64 h-full bg-dark text-light flex flex-col py-4"
             style={{ backgroundColor: "var(--color-dark)", color: "var(--color-light)" }}>
