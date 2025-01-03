@@ -12,6 +12,7 @@ export interface Budget {
     name: string;
     totalamount: number;
     projectid: number;
+    categoryid: number;
 }
 
 export interface APIBudgetResponse {
@@ -24,6 +25,7 @@ export interface Expense {
     description: string;
     date: string;
     budgetid: number;
+    categoryid: number;
 }
 
 export interface APIExpenseResponse {
@@ -42,7 +44,6 @@ export interface APIManagerResponse {
 export interface Category {
     id: number;
     name: string;
-    projectid: number;
 }
 
 export interface APICategoryResponse {

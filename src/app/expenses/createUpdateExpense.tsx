@@ -22,6 +22,7 @@ const FormSchema = z.object({
     description: z.string().nonempty("Description is required"),
     date: z.date().optional(),
     budgetid: z.number().positive("Budget ID must be a positive number"),
+    categoryid: z.number().positive("Category ID must be a positive number"),
 });
 
 export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdate, refreshData }: {
@@ -30,6 +31,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
     refreshData: () => void;
 }) {
     const [budgets, setBudgets] = useState<{ id: number; name: string }[]>([]);
+    const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
@@ -40,6 +42,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
             description: "",
             date: new Date(),
             budgetid: 0,
+            categoryid: 0,
         },
     });
 
@@ -54,7 +57,20 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                 console.error("Error fetching budgets:", error);
             }
         };
+
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch("/api/category");
+                if (!response.ok) throw new Error("Failed to fetch categories");
+                const data = await response.json();
+                setCategories(data.categories || []);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
         fetchBudgets();
+        fetchCategories();
     }, []);
 
     useEffect(() => {
@@ -74,6 +90,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             description: data.expense.description,
                             date: new Date(data.expense.date),
                             budgetid: data.expense.budgetid,
+                            categoryid: data.expense.categoryid,
                         });
                     } else {
                         console.error("Expense not found");
@@ -202,6 +219,32 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                                         {budgets.map((budget) => (
                                             <option key={budget.id} value={budget.id}>
                                                 {budget.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="categoryid"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Budget</FormLabel>
+                                <FormControl>
+                                    <select
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                                        className="w-full border border-gray-300 rounded-md p-2"
+                                    >
+                                        <option value="" disabled>
+                                            Select a Category
+                                        </option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
                                             </option>
                                         ))}
                                     </select>

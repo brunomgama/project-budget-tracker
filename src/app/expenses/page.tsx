@@ -13,6 +13,7 @@ const headers = [
     { field: "description", label: "Description", type: "string" },
     { field: "date", label: "Date", type: "date" },
     { field: "budgetid", label: "Budget", type: "string" },
+    { field: "categoryid", label: "Category", type: "string" },
 ];
 
 export default function Expenses() {
@@ -21,6 +22,7 @@ export default function Expenses() {
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
     const [budgetMap, setBudgetMap] = useState<{ [key: number]: string }>({});
+    const [categoryMap, setCategryMap] = useState<{ [key: number]: string }>({});
 
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -29,6 +31,7 @@ export default function Expenses() {
 
     useEffect(() => {
         fetchBudgets();
+        fetchCategories();
         fetchData();
     }, []);
 
@@ -49,6 +52,27 @@ export default function Expenses() {
             })
             .catch((error) => {
                 console.error("Error fetching budgets:", error);
+                setError(error.message);
+            });
+    };
+
+    const fetchCategories = () => {
+        fetch("/api/category")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch categories");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                const map: { [key: number]: string } = {};
+                data.categories.forEach((category: { id: number; name: string }) => {
+                    map[category.id] = category.name;
+                });
+                setCategryMap(map);
+            })
+            .catch((error) => {
+                console.error("Error fetching categories:", error);
                 setError(error.message);
             });
     };
@@ -119,6 +143,7 @@ export default function Expenses() {
                     data={paginatedData.map((expense) => ({
                         ...expense,
                         budgetid: budgetMap[expense.budgetid] || "Unknown Budget",
+                        categoryid: categoryMap[expense.categoryid] || "Unknown Category",
                     }))}
                     headers={headers}
                     onSort={handleSort}

@@ -11,12 +11,14 @@ const headers = [
     { field: "id", label: "Budget Id", type: "number" },
     { field: "name", label: "Name", type: "string" },
     { field: "totalamount", label: "Total Amount", type: "money" },
-    { field: "projectid", label: "Project Name", type: "string" },
+    { field: "projectid", label: "Project", type: "string" },
+    { field: "categoryid", label: "Category", type: "string" },
 ];
 
 export default function Projects() {
     const [data, setData] = useState<Budget[]>([]);
     const [projects, setProjects] = useState<{ [key: number]: string }>({});
+    const [category, setCategory] = useState<{ [key: number]: string }>({});
     const [filteredData, setFilteredData] = useState<Budget[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,7 @@ export default function Projects() {
     useEffect(() => {
         fetchData();
         fetchProjects();
+        fetchCategory();
     }, []);
 
     const fetchData = () => {
@@ -70,6 +73,26 @@ export default function Projects() {
             });
     };
 
+    const fetchCategory = () => {
+        fetch("/api/category")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch category data");
+                }
+                return response.json();
+            })
+            .then((data: { categories: { id: number; name: string }[] }) => {
+                const categoryMap: { [key: number]: string } = {};
+                data.categories.forEach((category) => {
+                    categoryMap[category.id] = category.name;
+                });
+                setCategory(categoryMap);
+            })
+            .catch((error) => {
+                console.error("Error fetching projects:", error);
+            });
+    };
+
     const handleSearch = (query: string) => {
         setSearchQuery(query);
         const filtered = data.filter((budget) => budget.name.toLowerCase().includes(query.toLowerCase()));
@@ -99,6 +122,7 @@ export default function Projects() {
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage).map((budget) => ({
         ...budget,
         projectid: projects[budget.projectid] || "Unknown Project",
+        categoryid: category[budget.categoryid] || "Unknown Category",
     }));
 
     if (error) {

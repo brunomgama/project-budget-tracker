@@ -38,16 +38,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     try {
         const id = params.id;
         const body = await req.json();
-        const { amount, description, date, budgetid } = body;
+        const { amount, description, date, budgetid, categoryid } = body;
 
-        if (!amount || !description || !date || !budgetid) {
+        if (!amount || !description || !date || !budgetid || !categoryid) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const sql = `UPDATE expense SET amount = ?, description = ?, date = ?, budgetid = ? WHERE id = ?`;
+        const sql = `UPDATE expense SET amount = ?, description = ?, date = ?, budgetid = ?, categoryid = ? WHERE id = ?`;
 
         const result = await new Promise<{ message: string; changes: number }>((resolve, reject) => {
-            db.run(sql, [amount, description, date, budgetid, id], function (this: sqlite3.RunResult, err: { message: string }) {
+            db.run(sql, [amount, description, date, budgetid, categoryid, id], function (this: sqlite3.RunResult, err: { message: string }) {
                 if (err) {
                     console.error("Update Error:", err.message);
                     reject(err);

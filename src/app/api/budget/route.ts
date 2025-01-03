@@ -57,12 +57,12 @@ export async function DELETE(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name, totalamount, projectid } = body;
+        const { name, totalamount, projectid, categoryid } = body;
 
-        const sql = `INSERT INTO budget (name, totalamount, projectid) VALUES (?, ?, ?)`;
+        const sql = `INSERT INTO budget (name, totalamount, projectid, categoryid) VALUES (?, ?, ?, ?)`;
 
         const result = await new Promise((resolve, reject) => {
-            db.run(sql, [name, totalamount, projectid], function (this: sqlite3.RunResult, err: { message: any; }) {
+            db.run(sql, [name, totalamount, projectid, categoryid], function (this: sqlite3.RunResult, err: { message: any; }) {
                 if (err) {
                     console.error("Insert Error:", err.message);
                     reject(err);

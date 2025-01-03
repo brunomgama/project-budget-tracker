@@ -18,7 +18,6 @@ import {Input} from "@/components/ui/input";
 
 const FormSchema = z.object({
     name: z.string().nonempty("Name is required"),
-    projectid: z.coerce.number().positive("Project ID must be a positive number"),
 });
 
 export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpdate, refreshData }: {
@@ -26,7 +25,6 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
-    const [projects, setProjects] = useState<{ id: number; name: string }[]>([]);
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
@@ -34,26 +32,10 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
-            projectid: 0,
         },
     });
 
     useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                const res = await fetch("/api/project");
-                if (!res.ok) {
-                    throw new Error(`Failed to fetch projects: ${res.statusText}`);
-                }
-                const data = await res.json();
-                setProjects(data.projects);
-            } catch (error) {
-                console.error("Error fetching projects:", error);
-            }
-        };
-
-        fetchProjects();
-
         if (isUpdate && selectedId) {
             const fetchCategory = async () => {
                 try {
@@ -66,7 +48,6 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
                     if (data.category) {
                         form.reset({
                             name: data.category.name,
-                            projectid: data.category.projectid,
                         });
                     } else {
                         console.error("Category not found");
@@ -126,30 +107,6 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
                                         placeholder="Enter category name"
                                         {...field}
                                     />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="projectid"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Project</FormLabel>
-                                <FormControl>
-                                    <select
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                        className="border border-gray-300 rounded p-2 w-full"
-                                    >
-                                        <option value="">Select Project</option>
-                                        {projects.map((project) => (
-                                            <option key={project.id} value={project.id}>
-                                                {project.name}
-                                            </option>
-                                        ))}
-                                    </select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
