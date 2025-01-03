@@ -7,12 +7,26 @@ interface Header {
 }
 
 export default function InfoTable(
-    {data, headers, onSort}:
-    { data: Record<string, any>[]; headers: Header[]; onSort: (key: string) => void; }) {
+    {data, headers, onSort, selectedItems, onSelectItem, onSelectAll}:
+    {
+        data: Record<string, any>[];
+        headers: Header[];
+        onSort: (key: string) => void;
+        selectedItems: Set<number>;
+        onSelectItem: (id: number) => void;
+        onSelectAll: () => void;
+    }) {
     return (
         <Table className="min-w-full">
             <TableHeader>
                 <TableRow>
+                    <TableHead>
+                        <input
+                            type="checkbox"
+                            checked={data.length > 0 && selectedItems.size === data.length}
+                            onChange={onSelectAll}
+                        />
+                    </TableHead>
                     {headers.map((header) => (
                         <TableHead key={header.field} className="cursor-pointer" onClick={() => onSort(header.field)}>
                             {header.label}
@@ -23,7 +37,14 @@ export default function InfoTable(
             <TableBody>
                 {data.length > 0 ? (
                     data.map((row, index) => (
-                        <TableRow key={index}>
+                        <TableRow key={index} className="cursor-pointer" onClick={() => onSelectItem(row.id)}>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedItems.has(row.id)}
+                                    onChange={() => onSelectItem(row.id)}
+                                />
+                            </TableCell>
                             {headers.map((header) => (
                                 <TableCell key={header.field}>
                                     {header.type === "money"
@@ -32,10 +53,11 @@ export default function InfoTable(
                                 </TableCell>
                             ))}
                         </TableRow>
+
                     ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={headers.length} className="text-center py-6">
+                        <TableCell colSpan={headers.length + 1} className="text-center py-6">
                             No data available.
                         </TableCell>
                     </TableRow>

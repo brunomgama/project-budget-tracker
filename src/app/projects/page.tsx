@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {APIProjectResponse, Project} from "@/types/interfaces/interface";
+import { APIProjectResponse, Project } from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
@@ -15,7 +15,7 @@ const headers = [
 export default function Projects() {
     const [data, setData] = useState<Project[]>([]);
     const [filteredData, setFilteredData] = useState<Project[]>([]);
-
+    const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -57,6 +57,28 @@ export default function Projects() {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
+    const handleSelectItem = (id: number) => {
+        const newSelectedItems = new Set(selectedItems)
+
+        if(newSelectedItems.has(id)) {
+            newSelectedItems.delete(id);
+        }
+        else {
+            newSelectedItems.add(id);
+        }
+
+        setSelectedItems(newSelectedItems)
+    }
+
+    const handleSelectAll = () => {
+        if (selectedItems.size === filteredData.length) {
+            setSelectedItems(new Set());
+        } else {
+            const allIds = new Set(filteredData.map((item) => item.id));
+            setSelectedItems(allIds);
+        }
+    };
+
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
@@ -81,6 +103,9 @@ export default function Projects() {
                     data={paginatedData}
                     headers={headers}
                     onSort={handleSort}
+                    selectedItems={selectedItems}
+                    onSelectItem={handleSelectItem}
+                    onSelectAll={handleSelectAll}
                 />
             </div>
 
@@ -94,5 +119,4 @@ export default function Projects() {
             />
         </div>
     );
-
 }
