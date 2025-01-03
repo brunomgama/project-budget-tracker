@@ -8,7 +8,7 @@ import Pagination from "@/components/pagination";
 import InfoTable from "@/components/infotable";
 
 const headers = [
-    { field: "id", label: "ID", type: "number" },
+    { field: "id", label: "Expense Id", type: "number" },
     { field: "amount", label: "Amount", type: "money" },
     { field: "description", label: "Description", type: "string" },
     { field: "date", label: "Date", type: "date" },

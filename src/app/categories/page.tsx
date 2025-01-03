@@ -8,14 +8,12 @@ import Pagination from "@/components/pagination";
 import InfoTable from "@/components/infotable";
 
 const headers = [
-    { field: "id", label: "ID", type: "number" },
+    { field: "id", label: "Category Id", type: "number" },
     { field: "name", label: "Name", type: "string" },
-    { field: "projectid", label: "Project Name", type: "string" },
 ];
 
 export default function Categories() {
     const [data, setData] = useState<Category[]>([]);
-    const [projects, setProjects] = useState<{ [key: number]: string }>({});
     const [filteredData, setFilteredData] = useState<Category[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
@@ -27,7 +25,6 @@ export default function Categories() {
 
     useEffect(() => {
         fetchData();
-        fetchProjects();
     }, []);
 
     const fetchData = () => {
@@ -46,26 +43,6 @@ export default function Categories() {
             .catch((error) => {
                 console.error("Error fetching data:", error);
                 setError(error.message);
-            });
-    };
-
-    const fetchProjects = () => {
-        fetch("/api/project")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch projects");
-                }
-                return response.json();
-            })
-            .then((data: { projects: { id: number; name: string }[] }) => {
-                const projectMap: { [key: number]: string } = {};
-                data.projects.forEach((project) => {
-                    projectMap[project.id] = project.name;
-                });
-                setProjects(projectMap);
-            })
-            .catch((error) => {
-                console.error("Error fetching projects:", error);
             });
     };
 
@@ -97,7 +74,6 @@ export default function Categories() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage).map((category) => ({
         ...category,
-        projectid: projects[category.projectid] || "Unknown Project",
     }));
 
     if (error) {

@@ -11,7 +11,7 @@ export default function InfoTable(
     {
         data: Record<string, any>[];
         headers: Header[];
-        onSort: (key: string) => void;
+        onSort?: (key: string) => void;
         selectedItems: Set<number>;
         onSelectItem: (id: number) => void;
     }) {
@@ -23,8 +23,14 @@ export default function InfoTable(
                         {/* Empty header for checkbox */}
                     </TableHead>
                     {headers.map((header) => (
-                        <TableHead key={header.field} className="cursor-pointer" onClick={() => onSort(header.field)}>
+                        <TableHead key={header.field} className={`cursor-pointer ${onSort ? "hover:text-blue-600" : ""}`}
+                            onClick={() => {
+                                if (onSort) {
+                                    onSort(header.field);
+                                }
+                            }}>
                             {header.label}
+                            {onSort && <span className="ml-1 text-sm text-gray-400">↕</span>}
                         </TableHead>
                     ))}
                 </TableRow>
