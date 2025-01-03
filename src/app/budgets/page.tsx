@@ -11,11 +11,12 @@ const headers = [
     { field: "id", label: "ID", type: "number" },
     { field: "name", label: "Name", type: "string" },
     { field: "totalamount", label: "Total Amount", type: "money" },
-    { field: "projectid", label: "Project Id", type: "number" },
+    { field: "projectid", label: "Project Name", type: "string" },
 ];
 
 export default function Projects() {
     const [data, setData] = useState<Budget[]>([]);
+    const [projects, setProjects] = useState<{ [key: number]: string }>({});
     const [filteredData, setFilteredData] = useState<Budget[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,7 @@ export default function Projects() {
 
     useEffect(() => {
         fetchData();
+        fetchProjects();
     }, []);
 
     const fetchData = () => {
@@ -45,6 +47,26 @@ export default function Projects() {
             .catch((error) => {
                 console.error("Error fetching data:", error);
                 setError(error.message);
+            });
+    };
+
+    const fetchProjects = () => {
+        fetch("/api/project")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch project data");
+                }
+                return response.json();
+            })
+            .then((data: { projects: { id: number; name: string }[] }) => {
+                const projectMap: { [key: number]: string } = {};
+                data.projects.forEach((project) => {
+                    projectMap[project.id] = project.name;
+                });
+                setProjects(projectMap);
+            })
+            .catch((error) => {
+                console.error("Error fetching projects:", error);
             });
     };
 
@@ -70,11 +92,14 @@ export default function Projects() {
         } else {
             setSelectedItems(new Set([id]))
         }
-    }
+    };
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage).map((budget) => ({
+        ...budget,
+        projectid: projects[budget.projectid] || "Unknown Project",
+    }));
 
     if (error) {
         return (
@@ -83,12 +108,12 @@ export default function Projects() {
             </p>
         );
     }
-    
+
     return (
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             <div className="flex justify-between">
                 <SearchBar searchQuery={searchQuery} onSearch={handleSearch} />
-                <TableActionButtons selectedItems={selectedItems} refreshData={fetchData}/>
+                <TableActionButtons selectedItems={selectedItems} refreshData={fetchData} />
             </div>
 
             <div className="flex-grow overflow-auto">

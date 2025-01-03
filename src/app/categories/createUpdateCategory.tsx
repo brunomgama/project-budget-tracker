@@ -13,12 +13,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {Input} from "@/components/ui/input";
 
 const FormSchema = z.object({
     name: z.string().nonempty("Name is required"),
-    color: z.string().nonempty("Color is required"),
     projectid: z.coerce.number().positive("Project ID must be a positive number"),
 });
 
@@ -27,6 +26,7 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    const [projects, setProjects] = useState<{ id: number; name: string }[]>([]);
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
@@ -34,16 +34,29 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
-            color: "",
             projectid: 0,
         },
     });
 
     useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const res = await fetch("/api/project");
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch projects: ${res.statusText}`);
+                }
+                const data = await res.json();
+                setProjects(data.projects);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        };
+
+        fetchProjects();
+
         if (isUpdate && selectedId) {
             const fetchCategory = async () => {
                 try {
-                    console.log(`Fetching category for ID: ${selectedId}`);
                     const res = await fetch(`/api/category/${selectedId}`);
                     if (!res.ok) {
                         throw new Error(`Failed to fetch category: ${res.statusText}`);
@@ -53,7 +66,6 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
                     if (data.category) {
                         form.reset({
                             name: data.category.name,
-                            color: data.category.color,
                             projectid: data.category.projectid,
                         });
                     } else {
@@ -119,38 +131,25 @@ export default function CreateUpdateCategory({ selectedItems, handleCreateOrUpda
                             </FormItem>
                         )}
                     />
-
-                    <FormField
-                        control={form.control}
-                        name="color"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Color</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="text"
-                                        placeholder="Enter color"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
                     <FormField
                         control={form.control}
                         name="projectid"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Project ID</FormLabel>
+                                <FormLabel>Project</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter associated project ID"
+                                    <select
                                         value={field.value || ""}
-                                        onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
-                                    />
+                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                        className="border border-gray-300 rounded p-2 w-full"
+                                    >
+                                        <option value="">Select Project</option>
+                                        {projects.map((project) => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

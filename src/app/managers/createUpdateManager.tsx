@@ -17,9 +17,7 @@ import { Input } from "@/components/ui/input";
 import {useEffect} from "react";
 
 const FormSchema = z.object({
-    name: z.string().min(2, {
-        message: "Name must be at least 2 characters.",
-    }),
+    name: z.string().nonempty("Manager name is required"),
 });
 
 export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate, refreshData}: {

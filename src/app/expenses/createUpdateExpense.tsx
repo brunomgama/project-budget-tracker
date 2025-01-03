@@ -13,13 +13,14 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const FormSchema = z.object({
     amount: z.number().positive("Amount must be a positive number"),
     description: z.string().nonempty("Description is required"),
-    date: z.string().nonempty("Date is required"),
+    date: z.date().optional(),
     budgetid: z.number().positive("Budget ID must be a positive number"),
 });
 
@@ -28,6 +29,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    const [budgets, setBudgets] = useState<{ id: number; name: string }[]>([]);
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
@@ -36,10 +38,24 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         defaultValues: {
             amount: 0,
             description: "",
-            date: "",
+            date: new Date(),
             budgetid: 0,
         },
     });
+
+    useEffect(() => {
+        const fetchBudgets = async () => {
+            try {
+                const response = await fetch("/api/budget");
+                if (!response.ok) throw new Error("Failed to fetch budgets");
+                const data = await response.json();
+                setBudgets(data.budgets || []);
+            } catch (error) {
+                console.error("Error fetching budgets:", error);
+            }
+        };
+        fetchBudgets();
+    }, []);
 
     useEffect(() => {
         if (isUpdate && selectedId) {
@@ -56,7 +72,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                         form.reset({
                             amount: data.expense.amount,
                             description: data.expense.description,
-                            date: data.expense.date,
+                            date: new Date(data.expense.date),
                             budgetid: data.expense.budgetid,
                         });
                     } else {
@@ -76,10 +92,8 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
             const url = isUpdate ? `/api/expense/${selectedId}` : `/api/expense`;
 
             const body = {
-                amount: parseFloat(data.amount.toString()),
-                description: data.description,
-                date: data.date,
-                budgetid: parseInt(data.budgetid.toString(), 10),
+                ...data,
+                date: data.date?.toISOString().split('T')[0],
             };
 
             const res = await fetch(url, {
@@ -104,7 +118,6 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         }
     };
 
-
     return (
         <DialogHeader>
             <DialogTitle>{isUpdate ? "Update Expense" : "Create New Expense"}</DialogTitle>
@@ -120,13 +133,15 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             <FormItem>
                                 <FormLabel>Amount</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Enter amount"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                                    />
+                                    <div className="flex items-center border border-gray-300 rounded-md p-2">
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter amount"
+                                            {...field}
+                                            className={"w-full mr-2"}
+                                        />
+                                        <span className="mr-2 text-gray-500">€</span>
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -156,11 +171,14 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             <FormItem>
                                 <FormLabel>Date</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="date"
-                                        placeholder="Select date"
-                                        {...field}
-                                    />
+                                    <div className="flex justify-start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value || new Date()}
+                                            onSelect={(selectedDate) => field.onChange(selectedDate)}
+                                            className="rounded-md border shadow"
+                                        />
+                                    </div>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -171,16 +189,24 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                         name="budgetid"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Budget ID</FormLabel>
+                                <FormLabel>Budget</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter associated budget ID"
+                                    <select
                                         value={field.value || ""}
                                         onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
-                                    />
+                                        className="w-full border border-gray-300 rounded-md p-2"
+                                    >
+                                        <option value="" disabled>
+                                            Select a budget
+                                        </option>
+                                        {budgets.map((budget) => (
+                                            <option key={budget.id} value={budget.id}>
+                                                {budget.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
                         )}
                     />

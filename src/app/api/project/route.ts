@@ -59,6 +59,21 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const { name } = body;
 
+        const existingProject = await new Promise<any>((resolve, reject) => {
+            db.get('SELECT * FROM project WHERE name = ?', [name], (err: Error, row: any) => {
+                if (err) {
+                    console.error("Check Error:", err.message);
+                    reject(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+
+        if (existingProject) {
+            return NextResponse.json({ error: "A project with this name already exists" }, { status: 400 });
+        }
+
         const sql = `INSERT INTO project (name) VALUES (?)`;
 
         const result = await new Promise((resolve, reject) => {

@@ -42,7 +42,6 @@ export interface APIManagerResponse {
 export interface Category {
     id: number;
     name: string;
-    color: string;
     projectid: number;
 }
 

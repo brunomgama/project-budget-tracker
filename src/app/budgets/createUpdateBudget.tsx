@@ -13,8 +13,9 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {Project} from "@/types/interfaces/interface";
+import {Input} from "@/components/ui/input";
 
 const FormSchema = z.object({
     name: z.string().nonempty("Name is required"),
@@ -30,6 +31,8 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
+    const [projects, setProjects] = useState<Project[]>([]);
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -38,6 +41,25 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
             projectid: 0,
         },
     });
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const res = await fetch("/api/project");
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error("Failed to fetch projects");
+                }
+
+                setProjects(data.projects);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        };
+
+        fetchProjects();
+    }, []);
 
     useEffect(() => {
         if (isUpdate && selectedId) {
@@ -126,29 +148,41 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                             <FormItem>
                                 <FormLabel>Total Amount</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter total amount"
-                                        {...field}
-                                    />
+                                    <div className="flex items-center border border-gray-300 rounded-md p-2">
+                                        <Input
+                                            type="number"
+                                            placeholder="Enter total amount"
+                                            {...field}
+                                            className={"w-full mr-2"}
+                                        />
+                                        <span className="mr-2 text-gray-500">€</span>
+                                    </div>
                                 </FormControl>
-                                <FormMessage />
+                                <FormMessage/>
                             </FormItem>
-                        )}
-                    />
+                            )}
+                        />
                     <FormField
                         control={form.control}
                         name="projectid"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Project ID</FormLabel>
+                                <FormLabel>Project</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        placeholder="Enter associated project ID"
+                                    <select
                                         value={field.value || ""}
                                         onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
-                                    />
+                                        className="w-full border border-gray-300 rounded-md p-2"
+                                    >
+                                        <option value="" disabled>
+                                            Select a project
+                                        </option>
+                                        {projects.map((project) => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

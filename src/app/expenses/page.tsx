@@ -12,14 +12,15 @@ const headers = [
     { field: "amount", label: "Amount", type: "money" },
     { field: "description", label: "Description", type: "string" },
     { field: "date", label: "Date", type: "date" },
-    { field: "budgetid", label: "Budget ID", type: "string" },
+    { field: "budgetid", label: "Budget", type: "string" },
 ];
 
-export default function Projects() {
+export default function Expenses() {
     const [data, setData] = useState<Expense[]>([]);
     const [filteredData, setFilteredData] = useState<Expense[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
+    const [budgetMap, setBudgetMap] = useState<{ [key: number]: string }>({});
 
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -27,8 +28,30 @@ export default function Projects() {
     const itemsPerPage = 15;
 
     useEffect(() => {
+        fetchBudgets();
         fetchData();
     }, []);
+
+    const fetchBudgets = () => {
+        fetch("/api/budget")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch budgets");
+                }
+                return response.json();
+            })
+            .then((data) => {
+                const map: { [key: number]: string } = {};
+                data.budgets.forEach((budget: { id: number; name: string }) => {
+                    map[budget.id] = budget.name;
+                });
+                setBudgetMap(map);
+            })
+            .catch((error) => {
+                console.error("Error fetching budgets:", error);
+                setError(error.message);
+            });
+    };
 
     const fetchData = () => {
         fetch("/api/expense")
@@ -67,11 +90,11 @@ export default function Projects() {
 
     const handleSelectItem = (id: number) => {
         if (selectedItems.has(id)) {
-            setSelectedItems(new Set())
+            setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set([id]))
+            setSelectedItems(new Set([id]));
         }
-    }
+    };
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -84,7 +107,6 @@ export default function Projects() {
             </p>
         );
     }
-    
     return (
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             <div className="flex justify-between">
@@ -94,7 +116,10 @@ export default function Projects() {
 
             <div className="flex-grow overflow-auto">
                 <InfoTable
-                    data={paginatedData}
+                    data={paginatedData.map((expense) => ({
+                        ...expense,
+                        budgetid: budgetMap[expense.budgetid] || "Unknown Budget",
+                    }))}
                     headers={headers}
                     onSort={handleSort}
                     selectedItems={selectedItems}
@@ -112,5 +137,4 @@ export default function Projects() {
             />
         </div>
     );
-
 }

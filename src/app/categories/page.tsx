@@ -10,12 +10,12 @@ import InfoTable from "@/components/infotable";
 const headers = [
     { field: "id", label: "ID", type: "number" },
     { field: "name", label: "Name", type: "string" },
-    { field: "color", label: "Color", type: "string" },
-    { field: "projectid", label: "Project ID", type: "number" },
+    { field: "projectid", label: "Project Name", type: "string" },
 ];
 
-export default function Projects() {
+export default function Categories() {
     const [data, setData] = useState<Category[]>([]);
+    const [projects, setProjects] = useState<{ [key: number]: string }>({});
     const [filteredData, setFilteredData] = useState<Category[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +27,7 @@ export default function Projects() {
 
     useEffect(() => {
         fetchData();
+        fetchProjects();
     }, []);
 
     const fetchData = () => {
@@ -48,6 +49,26 @@ export default function Projects() {
             });
     };
 
+    const fetchProjects = () => {
+        fetch("/api/project")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch projects");
+                }
+                return response.json();
+            })
+            .then((data: { projects: { id: number; name: string }[] }) => {
+                const projectMap: { [key: number]: string } = {};
+                data.projects.forEach((project) => {
+                    projectMap[project.id] = project.name;
+                });
+                setProjects(projectMap);
+            })
+            .catch((error) => {
+                console.error("Error fetching projects:", error);
+            });
+    };
+
     const handleSearch = (query: string) => {
         setSearchQuery(query);
         const filtered = data.filter((category) => category.name.toLowerCase().includes(query.toLowerCase()));
@@ -66,15 +87,18 @@ export default function Projects() {
 
     const handleSelectItem = (id: number) => {
         if (selectedItems.has(id)) {
-            setSelectedItems(new Set())
+            setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set([id]))
+            setSelectedItems(new Set([id]));
         }
-    }
+    };
 
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage).map((category) => ({
+        ...category,
+        projectid: projects[category.projectid] || "Unknown Project",
+    }));
 
     if (error) {
         return (
@@ -88,7 +112,7 @@ export default function Projects() {
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             <div className="flex justify-between">
                 <SearchBar searchQuery={searchQuery} onSearch={handleSearch} />
-                <TableActionButtons selectedItems={selectedItems} refreshData={fetchData}/>
+                <TableActionButtons selectedItems={selectedItems} refreshData={fetchData} />
             </div>
 
             <div className="flex-grow overflow-auto">
@@ -111,5 +135,4 @@ export default function Projects() {
             />
         </div>
     );
-
 }

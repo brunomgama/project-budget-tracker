@@ -38,6 +38,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const body = await req.json();
         const { name } = body;
 
+        const existingProject = await new Promise<any>((resolve, reject) => {
+            db.get('SELECT * FROM project WHERE name = ?', [name], (err: Error, row: any) => {
+                if (err) {
+                    console.error("Check Error:", err.message);
+                    reject(err);
+                } else {
+                    resolve(row);
+                }
+            });
+        });
+
+        if (existingProject) {
+            return NextResponse.json({ error: "A project with this name already exists" }, { status: 400 });
+        }
+
         const sql = `UPDATE project SET name = ? WHERE id = ?`;
 
         const result = await new Promise<{ message: string; changes: number }>((resolve, reject) => {

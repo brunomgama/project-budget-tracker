@@ -17,9 +17,7 @@ import { Input } from "@/components/ui/input";
 import {useEffect} from "react";
 
 const FormSchema = z.object({
-    name: z.string().min(2, {
-        message: "Name must be at least 2 characters.",
-    }),
+    name: z.string().nonempty("Project name is required"),
 });
 
 export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate, refreshData}: {
@@ -73,6 +71,7 @@ export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate
             const result = await res.json();
 
             if (!res.ok) {
+                alert(result.error);
                 throw new Error(result.error || "Failed to save project");
             }
 
