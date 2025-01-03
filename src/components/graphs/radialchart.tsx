@@ -42,7 +42,7 @@ interface ComponentProps {
     description?: string;
 }
 
-export function Component({ chartData, title = "Budget Overview", description = "Project Budget Allocation" }: ComponentProps) {
+export function RadialChartComponent({ chartData, title = "Budget Overview", description = "Project Budget Allocation" }: ComponentProps) {
     return (
         <Card className="flex flex-col">
             <CardHeader className="items-center pb-0">

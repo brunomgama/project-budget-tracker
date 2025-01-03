@@ -1,20 +1,15 @@
 "use client";
 
 import TabSelection from "@/components/tabSelection";
-import { Component as BudgetRadialChart } from "@/components/budgetradialchart";
 import { useEffect, useState } from "react";
 import {
     APIProjectResponse,
     Project,
     Budget,
-    Expense,
-    APIBudgetResponse,
-    APIExpenseResponse
+    Expense, Category,
 } from "@/types/interfaces/interface";
-import TableOverview from "@/components/tableoverview";
-import InfoCard from "@/components/infocard";
-import {Tabs, TabsContent} from "@/components/ui/tabs";
-import Loading from "@/components/loading";
+import Overview from "@/components/overview";
+import Analytics from "@/components/analytics";
 
 const headers = [
     { field: "name", label: "Name", type: "string" },
@@ -23,6 +18,7 @@ const headers = [
 export default function HomePage() {
     const [data, setData] = useState<Project[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
@@ -103,47 +99,63 @@ export default function HomePage() {
         }
     };
 
+    useEffect(() => {
+        fetch("/api/category")
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch categories");
+                }
+                return response.json();
+            })
+            .then((data) => setCategories(data.categories))
+            .catch((error) => {
+                console.error("Error fetching categories:", error);
+            });
+    }, []);
+
     const totalBudget = budgets.reduce((sum, budget) => sum + budget.totalamount, 0);
     const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     const percentageConsumed = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
 
+    const colorGraphFill = percentageConsumed < 25 ? "hsl(var(--chart-2))" : (percentageConsumed < 50 ? "hsl(var(--chart-4))" : "hsl(var(--chart-1))");
+
     const chartData = [
-        { label: "Consumed", percentage: 100 - Math.round(percentageConsumed), value: totalExpenses, fill: "hsl(var(--chart-2))" },
+        { label: "Consumed", percentage: 100 - Math.round(percentageConsumed), value: totalExpenses, fill: colorGraphFill },
     ];
 
     return (
         <div className="container mx-auto px-4">
-            <h1 className="text-left text-3xl font-bold" style={{ color: "var(--color-darker)" }}>
-                Dashboard
-            </h1>
 
             <TabSelection activeTab={activeTab} setActiveTab={setActiveTab} />
 
             {activeTab === "overview" && (
-                <>
-                    <div className="flex mt-6">
-                        <div className="w-1/2 pr-4">
-                            <TableOverview
-                                data={paginatedData}
-                                headers={headers}
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                selectedItems={selectedItems}
-                                handleSelectItem={handleSelectItem}
-                                setCurrentPage={setCurrentPage}
-                            />
-                        </div>
+                <Overview
+                    paginatedData={paginatedData}
+                    headers={headers}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    selectedItems={selectedItems}
+                    handleSelectItem={handleSelectItem}
+                    setCurrentPage={setCurrentPage}
+                    chartData={chartData}
+                    totalBudget={totalBudget}
+                />
 
-                        <div className="w-1/2 pl-4">
-                            <BudgetRadialChart
-                                chartData={chartData}
-                                title="Budget Overview"
-                                description={`Total Budget: ${totalBudget.toLocaleString()} €`}
-                            />
-                        </div>
-                    </div>
-                    </>
             )}
+            {activeTab === "analytics" && (
+                <Analytics
+                    paginatedData={paginatedData}
+                    headers={headers}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    selectedItems={selectedItems}
+                    handleSelectItem={handleSelectItem}
+                    setCurrentPage={setCurrentPage}
+                    expenses={expenses}
+                    categories={categories}
+                />
+            )}
+
         </div>
     );
 }
