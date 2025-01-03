@@ -29,3 +29,23 @@ export interface Expense {
 export interface APIExpenseResponse {
     expenses: Expense[];
 }
+
+export interface Manager {
+    id: number;
+    name: string;
+}
+
+export interface APIManagerResponse {
+    managers: Manager[];
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    color: string;
+    projectid: number;
+}
+
+export interface APICategoryResponse {
+    categories: Category[];
+}

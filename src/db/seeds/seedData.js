@@ -4,7 +4,27 @@ db.serialize(() => {
     // Insert sample data into Project table
     db.run(`
         INSERT INTO project (name) VALUES
-            ('Project Alpha');
+            ('Project Alpha'),
+            ('Project Beta'),
+            ('Project Gamma'),
+            ('Project Delta'),
+            ('Project Epsilon'),
+            ('Project Zeta'),
+            ('Project Theta'),
+            ('Project Sigma'),
+            ('Project Omega'),
+            ('Project Nova'),
+            ('Project Eclipse'),
+            ('Project Zenith'),
+            ('Project Horizon'),
+            ('Project Aurora'),
+            ('Project Titan'),
+            ('Project Apex'),
+            ('Project Orbit'),
+            ('Project Fusion'),
+            ('Project Vertex'),
+            ('Project Radiant'),
+            ('Project Vanguard');
     `);
 
     // Insert sample data into Manager table
@@ -30,7 +50,7 @@ db.serialize(() => {
     // Insert sample data into Category table
     db.run(`
         INSERT INTO category (name, color, projectid) VALUES
-            ('Consultancy', 'blue', 1);
+            ('Consultancy', '#0000FF', 1);
     `);
 
     // Insert sample data into BudgetCategory linking table

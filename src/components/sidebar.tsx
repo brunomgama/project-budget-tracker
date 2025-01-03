@@ -1,9 +1,20 @@
 import Link from 'next/link';
-import { TbLayoutDashboard, TbHome } from 'react-icons/tb';
+import {
+    TbLayoutDashboard,
+    TbHome,
+    TbUserCircle,
+    TbCurrencyDollar,
+    TbTags,
+    TbReportMoney
+} from 'react-icons/tb';
 
 const menuItems = [
     { icon: <TbHome size={32} />, label: "Home", href: "/" },
     { icon: <TbLayoutDashboard size={32} />, label: "Projects", href: "/projects" },
+    { icon: <TbUserCircle size={32} />, label: "Managers", href: "/managers" },
+    { icon: <TbCurrencyDollar size={32} />, label: "Budgets", href: "/budgets" },
+    { icon: <TbTags size={32} />, label: "Categories", href: "/categories" },
+    { icon: <TbReportMoney size={32} />, label: "Expenses", href: "/expenses" },
 ];
 
 export default function Sidebar() {
@@ -15,7 +26,7 @@ export default function Sidebar() {
                 <span className="text-lg font-bold">Logo</span>
             </div>
 
-            <ul className="w-full">
+            <ul className="w-full mt-6">
                 {menuItems.map((item, index) => (
                     <li key={index}>
                         <Link
