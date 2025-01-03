@@ -28,7 +28,7 @@ export default function Sidebar() {
             style={{ backgroundColor: "var(--color-dark)", color: "var(--color-light)" }}>
             <div className="flex items-center gap-4 px-4 py-3">
                 <TbLayoutDashboard size={32} />
-                <span className="text-lg font-bold">Logo</span>
+                <span className="text-lg font-bold">Project Management</span>
             </div>
 
             <ul className="w-full mt-6">

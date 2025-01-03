@@ -154,8 +154,9 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                                         <Input
                                             type="number"
                                             placeholder="Enter amount"
-                                            {...field}
-                                            className={"w-full mr-2"}
+                                            value={field.value ?? ""}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                            className="w-full mr-2"
                                         />
                                         <span className="mr-2 text-gray-500">€</span>
                                     </div>

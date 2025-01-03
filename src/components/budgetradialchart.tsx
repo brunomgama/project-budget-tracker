@@ -21,6 +21,7 @@ import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 type ChartData = {
     label: string;
+    percentage: number;
     value: number;
     fill: string;
 };
@@ -31,7 +32,7 @@ const chartConfig = {
     },
     safari: {
         label: "Default Color",
-        color: "hsl(var(--chart-2))",
+        color: "hsl(var(--chart-1))",
     },
 } satisfies ChartConfig;
 
@@ -51,12 +52,12 @@ export function Component({ chartData, title = "Budget Overview", description = 
             <CardContent className="flex-1 pb-0">
                 <ChartContainer
                     config={chartConfig}
-                    className="mx-auto aspect-square max-h-[250px]"
+                    className="mx-auto aspect-square max-h-80 min-h-80"
                 >
                     <RadialBarChart
                         data={chartData}
-                        startAngle={0}
-                        endAngle={360}
+                        startAngle={90}
+                        endAngle={90 + (360 * chartData[0].percentage) / 100}
                         innerRadius={80}
                         outerRadius={110}
                     >
@@ -64,10 +65,13 @@ export function Component({ chartData, title = "Budget Overview", description = 
                             gridType="circle"
                             radialLines={false}
                             stroke="none"
-                            className="first:fill-muted last:fill-background"
                             polarRadius={[86, 74]}
                         />
-                        <RadialBar dataKey="value" background cornerRadius={10} />
+                        <RadialBar
+                            dataKey="percentage"
+                            cornerRadius={10}
+                            fill={chartData[0].fill}
+                        />
                         <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                             <Label
                                 content={({ viewBox }) => {
@@ -82,9 +86,9 @@ export function Component({ chartData, title = "Budget Overview", description = 
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={viewBox.cy}
-                                                    className="fill-foreground text-4xl font-bold"
+                                                    className="fill-foreground text-lg font-bold"
                                                 >
-                                                    {chartData[0]?.value?.toLocaleString() || 0}
+                                                    {chartData[0]?.value?.toLocaleString() || 0} €
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}
@@ -104,10 +108,10 @@ export function Component({ chartData, title = "Budget Overview", description = 
             </CardContent>
             <CardFooter className="flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing current available budget data
+                    <p>
+                        {`You have available ${chartData[0].percentage}% of your budget`}
+                    </p>
+                    <TrendingUp className="h-4 w-4" />
                 </div>
             </CardFooter>
         </Card>

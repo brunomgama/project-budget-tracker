@@ -1,10 +1,20 @@
 "use client";
 
 import TabSelection from "@/components/tabSelection";
-import InfoTable from "@/components/infotable";
-import Pagination from "@/components/pagination";
+import { Component as BudgetRadialChart } from "@/components/budgetradialchart";
 import { useEffect, useState } from "react";
-import { APIProjectResponse, Project, Budget } from "@/types/interfaces/interface";
+import {
+    APIProjectResponse,
+    Project,
+    Budget,
+    Expense,
+    APIBudgetResponse,
+    APIExpenseResponse
+} from "@/types/interfaces/interface";
+import TableOverview from "@/components/tableoverview";
+import InfoCard from "@/components/infocard";
+import {Tabs, TabsContent} from "@/components/ui/tabs";
+import Loading from "@/components/loading";
 
 const headers = [
     { field: "name", label: "Name", type: "string" },
@@ -12,9 +22,11 @@ const headers = [
 
 export default function HomePage() {
     const [data, setData] = useState<Project[]>([]);
-    const [budgets, setBudgets] = useState<Budget[]>([]); // Budgets for the selected project
+    const [budgets, setBudgets] = useState<Budget[]>([]);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
+    const [activeTab, setActiveTab] = useState("overview");
 
     const itemsPerPage = 10;
     const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -48,12 +60,35 @@ export default function HomePage() {
             const result = await response.json();
             if (response.ok) {
                 setBudgets(result.budgets);
+                const budgetIds = result.budgets.map((b: Budget) => b.id);
+                if (budgetIds.length > 0) {
+                    fetchExpenses(budgetIds);
+                } else {
+                    setExpenses([]);
+                }
             } else {
                 setBudgets([]);
+                setExpenses([]);
             }
         } catch (error) {
             console.error("Error fetching budgets:", error);
             setBudgets([]);
+            setExpenses([]);
+        }
+    };
+
+    const fetchExpenses = async (budgetIds: number[]) => {
+        try {
+            const response = await fetch(`/api/expense/budgets?ids=${budgetIds.join(",")}`);
+            const result = await response.json();
+            if (response.ok) {
+                setExpenses(result.expenses);
+            } else {
+                setExpenses([]);
+            }
+        } catch (error) {
+            console.error("Error fetching expenses:", error);
+            setExpenses([]);
         }
     };
 
@@ -61,13 +96,20 @@ export default function HomePage() {
         if (selectedItems.has(id)) {
             setSelectedItems(new Set());
             setBudgets([]);
+            setExpenses([]);
         } else {
             setSelectedItems(new Set([id]));
             fetchBudgets(id);
         }
     };
 
-    console.log(budgets)
+    const totalBudget = budgets.reduce((sum, budget) => sum + budget.totalamount, 0);
+    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const percentageConsumed = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
+
+    const chartData = [
+        { label: "Consumed", percentage: 100 - Math.round(percentageConsumed), value: totalExpenses, fill: "hsl(var(--chart-2))" },
+    ];
 
     return (
         <div className="container mx-auto px-4">
@@ -75,44 +117,33 @@ export default function HomePage() {
                 Dashboard
             </h1>
 
-            <TabSelection />
+            <TabSelection activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            <div className="flex">
-                <div className="w-1/2 pr-4">
-                    <InfoTable
-                        data={paginatedData}
-                        headers={headers}
-                        selectedItems={selectedItems}
-                        onSelectItem={handleSelectItem}
-                    />
-
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onFirstPage={() => setCurrentPage(1)}
-                        onPreviousPage={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                        onNextPage={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                        onLastPage={() => setCurrentPage(totalPages)}
-                    />
-                </div>
-
-                <div className="w-1/2 pl-4">
-                    {budgets.length > 0 ? (
-                        <div>
-                            <h2 className="text-xl font-bold">Budgets for Selected Project</h2>
-                            <ul className="mt-4">
-                                {budgets.map((budget) => (
-                                    <li key={budget.id} className="border-b py-2">
-                                        <strong>{budget.name}</strong>: {budget.totalamount} €
-                                    </li>
-                                ))}
-                            </ul>
+            {activeTab === "overview" && (
+                <>
+                    <div className="flex mt-6">
+                        <div className="w-1/2 pr-4">
+                            <TableOverview
+                                data={paginatedData}
+                                headers={headers}
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                selectedItems={selectedItems}
+                                handleSelectItem={handleSelectItem}
+                                setCurrentPage={setCurrentPage}
+                            />
                         </div>
-                    ) : (
-                        <p className="text-gray-500">Select a project to view its budget details.</p>
-                    )}
-                </div>
-            </div>
+
+                        <div className="w-1/2 pl-4">
+                            <BudgetRadialChart
+                                chartData={chartData}
+                                title="Budget Overview"
+                                description={`Total Budget: ${totalBudget.toLocaleString()} €`}
+                            />
+                        </div>
+                    </div>
+                    </>
+            )}
         </div>
     );
 }
