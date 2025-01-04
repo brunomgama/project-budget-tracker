@@ -89,6 +89,25 @@ export default function HomePage() {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch("/api/category");
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error("Failed to fetch categories");
+            }
+            setCategories(data.categories);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    };
+
+    const refreshOverviewData = async () => {
+        console.log("Refreshing Overview Data...");
+        await fetchData();
+        await fetchCategories();
+    };
+
     const handleSelectItem = (id: number) => {
         if (selectedItems.has(id)) {
             setSelectedItems(new Set());
@@ -99,20 +118,6 @@ export default function HomePage() {
             fetchBudgets(id);
         }
     };
-
-    useEffect(() => {
-        fetch("/api/category")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch categories");
-                }
-                return response.json();
-            })
-            .then((data) => setCategories(data.categories))
-            .catch((error) => {
-                console.error("Error fetching categories:", error);
-            });
-    }, []);
 
     const totalBudget = budgets.reduce((sum, budget) => sum + budget.totalamount, 0);
     const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -126,7 +131,11 @@ export default function HomePage() {
 
     return (
         <div className="container mx-auto">
-            <TabSelection activeTab={activeTab} setActiveTab={setActiveTab} />
+            <TabSelection
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                refreshOverviewData={refreshOverviewData}
+            />
             {activeTab === "overview" && (
                 <Overview
                     paginatedData={paginatedData}
@@ -139,7 +148,6 @@ export default function HomePage() {
                     chartData={chartData}
                     totalBudget={totalBudget}
                 />
-
             )}
             {activeTab === "analytics" && (
                 <Analytics
@@ -168,7 +176,6 @@ export default function HomePage() {
                     budgets={budgets}
                 />
             )}
-
         </div>
     );
 }

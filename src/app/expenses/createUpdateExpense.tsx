@@ -233,7 +233,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                         name="categoryid"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Budget</FormLabel>
+                                <FormLabel>Category</FormLabel>
                                 <FormControl>
                                     <select
                                         value={field.value || ""}

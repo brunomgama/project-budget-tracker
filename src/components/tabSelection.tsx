@@ -1,21 +1,30 @@
 "use client";
 
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InfoCard from "@/components/infocard";
 import Loading from "@/components/loading";
 import { useEffect, useState } from "react";
 import { APIBudgetResponse, APIExpenseResponse, APIProjectResponse } from "@/types/interfaces/interface";
-import {TbCurrencyDollar, TbLayoutDashboard, TbReportMoney, TbTags} from "react-icons/tb";
+import { TbCurrencyDollar, TbLayoutDashboard, TbReportMoney, TbTags } from "react-icons/tb";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import CreateUpdateBudget from "@/app/budgets/createUpdateBudget";
 import { Button } from "@/components/ui/button";
 import CreateUpdateExpense from "@/app/expenses/createUpdateExpense";
+import CreateUpdateProject from "@/app/projects/createUpdateProject";
 
-export default function TabSelection({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
-
+export default function TabSelection({
+                                         activeTab,
+                                         setActiveTab,
+                                         refreshOverviewData,
+                                     }: {
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
+    refreshOverviewData: () => void;
+}) {
     const [projectData, setProjectData] = useState<APIProjectResponse | null>(null);
     const [budgetData, setBudgetData] = useState<APIBudgetResponse | null>(null);
     const [expenseData, setExpenseData] = useState<APIExpenseResponse | null>(null);
+    const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
     const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
     const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
 
@@ -60,6 +69,8 @@ export default function TabSelection({ activeTab, setActiveTab }: { activeTab: s
             .catch((error) => {
                 console.error("Error refreshing data:", error);
             });
+
+        refreshOverviewData()
     };
 
     if (!projectData || !budgetData || !expenseData) {
@@ -87,10 +98,32 @@ export default function TabSelection({ activeTab, setActiveTab }: { activeTab: s
 
                     {activeTab === "overview" && (
                         <div className="flex gap-2">
-                            <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+                            <Dialog open={isProjectDialogOpen} onOpenChange={(open) => {
+                                setIsProjectDialogOpen(open);
+                                if (!open) refreshOverviewData();
+                            }}>
                                 <DialogTrigger asChild>
-                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg">
-                                        <TbCurrencyDollar/>
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                                        <TbLayoutDashboard />
+                                        Add Project
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <CreateUpdateProject
+                                        selectedItems={new Set()}
+                                        handleCreateOrUpdate={setIsProjectDialogOpen}
+                                        refreshData={refreshData}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+
+                            <Dialog open={isBudgetDialogOpen} onOpenChange={(open) => {
+                                setIsBudgetDialogOpen(open);
+                                if (!open) refreshOverviewData();
+                            }}>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+                                        <TbCurrencyDollar />
                                         Add Budget
                                     </Button>
                                 </DialogTrigger>
@@ -103,9 +136,12 @@ export default function TabSelection({ activeTab, setActiveTab }: { activeTab: s
                                 </DialogContent>
                             </Dialog>
 
-                            <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
+                            <Dialog open={isExpenseDialogOpen} onOpenChange={(open) => {
+                                setIsExpenseDialogOpen(open);
+                                if (!open) refreshOverviewData();
+                            }}>
                                 <DialogTrigger asChild>
-                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                                         <TbReportMoney />
                                         Add Expense
                                     </Button>
@@ -119,15 +155,15 @@ export default function TabSelection({ activeTab, setActiveTab }: { activeTab: s
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        )}
+                    )}
                 </div>
 
                 {activeTab === "overview" && (
                     <TabsContent value="overview">
                         <div className="flex flex-wrap gap-4 mt-6">
-                            <InfoCard title="Total Projects" value={projectData.projects.length.toString()} icon={<TbLayoutDashboard />} href="/projects" />
-                            <InfoCard title="Total Budgets" value={budgetData.budgets.length.toString()} icon={<TbCurrencyDollar />} href="/budgets" />
-                            <InfoCard title="Total Expenses" value={expenseData.expenses.length.toString()} icon={<TbTags />} href="/expenses" />
+                            <InfoCard title="Total Projects" value={projectData?.projects.length.toString()} icon={<TbLayoutDashboard />} href="/projects" />
+                            <InfoCard title="Total Budgets" value={budgetData?.budgets.length.toString()} icon={<TbCurrencyDollar />} href="/budgets" />
+                            <InfoCard title="Total Expenses" value={expenseData?.expenses.length.toString()} icon={<TbTags />} href="/expenses" />
                         </div>
                     </TabsContent>
                 )}
