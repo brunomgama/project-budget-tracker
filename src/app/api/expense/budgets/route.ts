@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-const db = require('../../../../db/database');
+import db from '../../../../db/database';
 
 // GET request to fetch expenses for specific budget IDs.
 export async function GET(req: NextRequest) {

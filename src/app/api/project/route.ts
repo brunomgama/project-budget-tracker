@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Project } from '@/types/interfaces/interface';
 import sqlite3 from 'sqlite3';
-const db = require('../../../db/database');
+import db from '../../../db/database';
 
 // GET request to fetch all projects.
 export async function GET(req: NextRequest) {

@@ -1,5 +1,5 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+import sqlite3 from 'sqlite3';
+import path from 'path';
 
 // Resolve the path to the SQLite database file.
 const dbPath = path.resolve(process.cwd(), 'src/db/budget_tracker.db');
@@ -13,5 +13,4 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-// Export the database connection object for use in other parts of the application.
-module.exports = db;
+export default db;

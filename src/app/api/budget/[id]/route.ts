@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
-const db = require('../../../../db/database');
+import db from '../../../../db/database';
 
 // GET request to fetch budget details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {

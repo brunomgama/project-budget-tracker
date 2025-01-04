@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Budget } from '@/types/interfaces/interface';
-const db = require('../../../db/database');
+import db from '../../../db/database';
 import sqlite3 from 'sqlite3';
 
 // GET request to fetch all budgets from the database.
