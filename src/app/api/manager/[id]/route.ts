@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import db from '../../../../db/database';
+import {Manager} from "@/types/interfaces/interface";
 
 // GET request to fetch manager details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -11,8 +12,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Invalid or missing ID" }, { status: 400 });
         }
 
-        const manager = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM manager WHERE id = ?', [id], (err: Error, row: any) => {
+        const manager = await new Promise<Manager | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM manager WHERE id = ?', [id], (err: Error, row: Manager | undefined) => {
                 if (err) {
                     console.error("Error fetching manager:", err);
                     reject(err);

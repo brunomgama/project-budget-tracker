@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '../../../../db/database';
+import {Budget} from "@/types/interfaces/interface";
 
 // GET request to fetch expenses for specific budget IDs.
 export async function GET(req: NextRequest) {
@@ -23,11 +24,11 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const expenses = await new Promise<any[]>((resolve, reject) => {
+        const expenses = await new Promise<Budget[] | undefined>((resolve, reject) => {
             const placeholders = ids.map(() => '?').join(', ');
             const sql = `SELECT * FROM expense WHERE budgetid IN (${placeholders})`;
 
-            db.all(sql, ids, (err: Error, rows: any[]) => {
+            db.all(sql, ids, (err: Error, rows: Budget[] | undefined) => {
                 if (err) {
                     console.error("Error fetching expenses:", err);
                     reject(err);

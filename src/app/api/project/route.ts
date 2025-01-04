@@ -70,8 +70,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if a project with the same name already exists.
-        const existingProject = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM project WHERE name = ?', [name.trim()], (err: Error, row: any) => {
+        const existingProject = await new Promise<Project | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM project WHERE name = ?', [name.trim()], (err: Error, row: Project | undefined) => {
                 if (err) {
                     console.error("Check Error:", err.message);
                     reject(err);

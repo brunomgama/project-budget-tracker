@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import db from '../../../../../db/database';
+import {Budget} from "@/types/interfaces/interface";
 
 // GET request to fetch all budgets associated with a specific project ID.
 export async function GET(req: Request, { params }: { params: { projectId: string } }) {
@@ -15,8 +16,8 @@ export async function GET(req: Request, { params }: { params: { projectId: strin
         }
 
         // Fetch all budgets for the given projectId.
-        const budgets = await new Promise<any[]>((resolve, reject) => {
-            db.all('SELECT * FROM budget WHERE projectid = ?', [projectId], (err: Error, rows: any[]) => {
+        const budgets = await new Promise<Budget[] | undefined>((resolve, reject) => {
+            db.all('SELECT * FROM budget WHERE projectid = ?', [projectId], (err: Error, rows: Budget[] | undefined) => {
                 if (err) {
                     console.error("Error fetching budgets:", err);
                     reject(err);

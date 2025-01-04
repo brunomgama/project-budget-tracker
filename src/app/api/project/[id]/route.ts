@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import db from '../../../../db/database';
+import {Project} from "@/types/interfaces/interface";
 
 // GET request to fetch project details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -12,8 +13,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         }
 
         // Query to fetch the project by ID.
-        const project = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM project WHERE id = ?', [id], (err: Error, row: any) => {
+        const project = await new Promise<Project | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM project WHERE id = ?', [id], (err: Error, row: Project | undefined) => {
                 if (err) {
                     console.error("Error fetching project:", err);
                     reject(err);
@@ -49,8 +50,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         }
 
         // Check if a project with the same name already exists (excluding the current project).
-        const existingProject = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM project WHERE name = ? AND id != ?', [name, id], (err: Error, row: any) => {
+        const existingProject = await new Promise<Project | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM project WHERE name = ? AND id != ?', [name, id], (err: Error, row: Project | undefined) => {
                 if (err) {
                     console.error("Check Error:", err.message);
                     reject(err);

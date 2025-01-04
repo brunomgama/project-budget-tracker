@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import db from '../../../../db/database';
+import {Category} from "@/types/interfaces/interface";
 
 // GET request to fetch category details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -11,8 +12,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Invalid or missing ID" }, { status: 400 });
         }
 
-        const category = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM category WHERE id = ?', [id], (err: Error, row: any) => {
+        const category = await new Promise<Category | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM category WHERE id = ?', [id], (err: Error, row: Category | undefined) => {
                 if (err) {
                     console.error("Error fetching category:", err);
                     reject(err);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import db from '../../../../db/database';
+import {Budget} from "@/types/interfaces/interface";
 
 // GET request to fetch budget details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {
@@ -12,8 +13,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         }
 
         // Fetch the budget by ID from the database.
-        const budget = await new Promise<any>((resolve, reject) => {
-            db.get('SELECT * FROM budget WHERE id = ?', [id], (err: Error, row: any) => {
+        const budget = await new Promise<Budget | undefined>((resolve, reject) => {
+            db.get('SELECT * FROM budget WHERE id = ?', [id], (err: Error, row: Budget | undefined) => {
                 if (err) {
                     console.error("Error fetching budget:", err);
                     reject(err);
