@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import db from '../../../db/database';
 
 // GET request to fetch all projects.
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const projects = await new Promise<Project[]>((resolve, reject) => {
             db.all('SELECT * FROM project', [], (err: Error, rows: Project[]) => {

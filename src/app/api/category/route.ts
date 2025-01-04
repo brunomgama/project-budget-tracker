@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import db from '../../../db/database';
 
 // GET request to fetch all categories.
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const categories = await new Promise<Category[]>((resolve, reject) => {
             db.all('SELECT * FROM category', [], (err: Error, rows: Category[]) => {

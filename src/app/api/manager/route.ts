@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import db from '../../../db/database';
 
 // GET request to fetch all managers.
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const managers = await new Promise<Manager[]>((resolve, reject) => {
             db.all('SELECT * FROM manager', [], (err: Error, rows: Manager[]) => {

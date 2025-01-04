@@ -4,7 +4,7 @@ import db from '../../../db/database';
 import sqlite3 from 'sqlite3';
 
 // GET request to fetch all budgets from the database.
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const budgets = await new Promise<Budget[]>((resolve, reject) => {
             db.all('SELECT * FROM budget', [], (err: Error, rows: Budget[]) => {

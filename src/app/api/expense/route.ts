@@ -4,7 +4,7 @@ import sqlite3 from 'sqlite3';
 import db from '../../../db/database';
 
 // GET request to fetch all expenses.
-export async function GET(req: NextRequest) {
+export async function GET() {
     try {
         const expenses = await new Promise<Expense[]>((resolve, reject) => {
             db.all('SELECT * FROM expense', [], (err: Error, rows: Expense[]) => {
