@@ -4,6 +4,15 @@ import TableOverview from "@/components/tableoverview";
 import { Category, Expense, Project } from "@/types/interfaces/interface";
 import { useState } from "react";
 import { BarChartComponent } from "@/components/graphs/barchart";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import DatePickerSection from "@/components/datepickersection";
 
 export default function Analytics({
                                       paginatedData,
@@ -67,53 +76,34 @@ export default function Analytics({
             </div>
 
             <div className="w-2/3 pr-4">
-                <div className="mb-4">
-                    <label htmlFor="category-select" className="block text-md font-medium text-gray-700">
-                        Filter by Category
-                    </label>
-                    <select
-                        id="category-select"
-                        value={selectedCategory ?? ""}
-                        onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : null)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                <div className="mb-4 bg-white rounded-md">
+                    <Select
+                        onValueChange={(value) => setSelectedCategory(value === "all" ? null : parseInt(value))}
                     >
-                        <option value="">All Categories</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="All Categories"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                {categories.map((category) => (
+                                    <SelectItem key={category.id} value={category.id.toString()}>
+                                        {category.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                 </div>
 
-                <div className="flex gap-4 mb-4">
-                    <div className="w-1/2">
-                        <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">
-                            Start Date
-                        </label>
-                        <input
-                            type="date"
-                            id="start-date"
-                            value={startDate || ""}
-                            onChange={(e) => setStartDate(e.target.value || null)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                    </div>
-                    <div className="w-1/2">
-                        <label htmlFor="end-date" className="block text-sm font-medium text-gray-700">
-                            End Date
-                        </label>
-                        <input
-                            type="date"
-                            id="end-date"
-                            value={endDate || ""}
-                            onChange={(e) => setEndDate(e.target.value || null)}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                    </div>
-                </div>
+                <DatePickerSection
+                    startDate={startDate ? new Date(startDate) : undefined}
+                    endDate={endDate ? new Date(endDate) : undefined}
+                    setStartDate={(date) => setStartDate(date ? date.toISOString().split("T")[0] : null)}
+                    setEndDate={(date) => setEndDate(date ? date.toISOString().split("T")[0] : null)}
+                />
 
-                <BarChartComponent chartData={formattedChartData} />
+                <BarChartComponent chartData={formattedChartData}/>
             </div>
         </div>
     );

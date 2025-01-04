@@ -12,16 +12,26 @@ export function BarChartComponent({ chartData }: BarChartProps) {
     const chartConfig: ChartConfig = {
         desktop: {
             label: "Expenses",
-            color: "hsl(var(--chart-1))",
+            color: "hsl(243 75.4% 58.6%)",
         },
     };
 
+    const allMonths = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+
+    const completeChartData = allMonths.map((month) => {
+        const existingData = chartData.find((data) => data.month === month);
+        return existingData || { month, amount: 0 };
+    });
+
     return (
-        <Card>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
-                    <BarChart data={chartData} width={400} height={300} accessibilityLayer>
-                        <CartesianGrid vertical={false} />
+        <Card className="bg-transparent shadow-none border-none">
+            <CardContent className="p-0">
+                <ChartContainer config={chartConfig} className="bg-transparent">
+                    <BarChart data={completeChartData} width={400} height={300} accessibilityLayer>
+                        <CartesianGrid vertical={false} stroke="var(--gray-200)" />
                         <XAxis
                             dataKey="month"
                             tickLine={false}

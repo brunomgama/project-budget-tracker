@@ -10,9 +10,10 @@ import {
 } from "@/types/interfaces/interface";
 import Overview from "@/components/overview";
 import Analytics from "@/components/analytics";
+import Reports from "@/components/reports";
 
 const headers = [
-    { field: "name", label: "Name", type: "string" },
+    { field: "name", label: "Project", type: "string" },
 ];
 
 export default function HomePage() {
@@ -151,6 +152,20 @@ export default function HomePage() {
                     setCurrentPage={setCurrentPage}
                     expenses={expenses}
                     categories={categories}
+                />
+            )}
+            {activeTab === "reports" && (
+                <Reports
+                    paginatedData={paginatedData}
+                    headers={headers}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    selectedItems={selectedItems}
+                    handleSelectItem={handleSelectItem}
+                    setCurrentPage={setCurrentPage}
+                    expenses={expenses}
+                    categories={categories}
+                    budgets={budgets}
                 />
             )}
 

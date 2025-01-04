@@ -59,7 +59,7 @@ export default function TableActionButtons({selectedItems, refreshData}: {select
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
                     <Button variant="outline" onClick={() => handleCreateOrUpdate(true)}>
-                        <TbPlus/>
+                        <TbPlus/> Create/Update
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -82,7 +82,7 @@ export default function TableActionButtons({selectedItems, refreshData}: {select
             </Dialog>
 
             <Button variant="destructive" onClick={handleDelete}>
-                <TbTrash/>
+                <TbTrash/> Delete
             </Button>
         </div>
     )
