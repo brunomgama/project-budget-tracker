@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Import necessary components and hooks.
+ * - Dialog components for displaying the header, title, and description.
+ * - Form components for handling input fields, validation, and submission.
+ * - UI components for input, buttons, and the calendar date picker.
+ */
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -19,6 +25,10 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
+/**
+ * Define the form schema for validation using Zod.
+ * - Validates each field to ensure correct data types and constraints.
+ */
 const FormSchema = z.object({
     amount: z.coerce.number().positive("Amount must be a positive number"),
     description: z.string().nonempty("Description is required"),
@@ -28,20 +38,30 @@ const FormSchema = z.object({
     categoryid: z.number().positive("Category ID must be a positive number"),
 });
 
+/**
+ * Main component for creating or updating an expense.
+ * - Props:
+ *   - selectedItems: set of selected expense IDs.
+ *   - handleCreateOrUpdate: function to close the form dialog.
+ *   - refreshData: function to refresh the expense data.
+ */
 export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdate, refreshData }: {
     selectedItems: Set<number>;
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    // State variables for storing project, budget, and category lists.
     const [projects, setProjects] = useState<{ id: number; name: string }[]>([]);
     const [budgets, setBudgets] = useState<{ id: number; name: string; projectid: number }[]>([]);
     const [filteredBudgets, setFilteredBudgets] = useState<{ id: number; name: string }[]>([]);
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
     const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
 
+    // Determine if this is an update operation and get the selected ID.
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
+    // Initialize the form with default values and validation schema.
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -54,6 +74,10 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         },
     });
 
+    /**
+     * Fetch the list of projects, budgets, and categories when the component mounts.
+     * - Populates the state variables with data from the API.
+     */
     useEffect(() => {
         const fetchProjects = async () => {
             try {
@@ -93,6 +117,10 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         fetchCategories();
     }, []);
 
+    /**
+     * Filter budgets based on the selected project.
+     * - Updates the list of budgets to show only those belonging to the selected project.
+     */
     useEffect(() => {
         if (selectedProjectId) {
             const projectBudgets = budgets.filter((budget) => budget.projectid === selectedProjectId);
@@ -102,6 +130,10 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         }
     }, [selectedProjectId, budgets]);
 
+    /**
+     * Fetch the expense details if this is an update operation.
+     * - Pre-fills the form with existing expense data if a selected ID is provided.
+     */
     useEffect(() => {
         if (isUpdate && selectedId) {
             const fetchExpense = async () => {
@@ -133,6 +165,11 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         }
     }, [isUpdate, selectedId, form]);
 
+    /**
+     * Handle form submission for creating or updating an expense.
+     * - Sends a POST request for creating a new expense.
+     * - Sends a PUT request for updating an existing expense.
+     */
     const onSubmit = async (data: z.infer<typeof FormSchema>) => {
         try {
             const method = isUpdate ? "PUT" : "POST";
@@ -140,7 +177,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
 
             const body = {
                 ...data,
-                date: data.date?.toISOString().split('T')[0],
+                date: data.date?.toISOString().split('T')[0], // Format date to "YYYY-MM-DD".
             };
 
             const res = await fetch(url, {
@@ -157,6 +194,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                 throw new Error(result.error || "Failed to save expense");
             }
 
+            // Successfully saved the expense.
             console.log("Expense saved successfully:", result);
             refreshData();
             handleCreateOrUpdate(false);
@@ -165,6 +203,10 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
         }
     };
 
+    /**
+     * Render the expense form inside a dialog.
+     * - Includes fields for amount, description, date, project, budget, and category.
+     */
     return (
         <DialogHeader>
             <DialogTitle>{isUpdate ? "Update Expense" : "Create New Expense"}</DialogTitle>
@@ -318,7 +360,11 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                         )}
                     />
                     <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => handleCreateOrUpdate(false)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleCreateOrUpdate(false)}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" className="bg-primaryAccent hover:bg-primaryText text-white">

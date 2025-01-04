@@ -1,4 +1,16 @@
-"use client"
+/**
+ * Sidebar Component
+ * A vertical navigation menu for the application.
+ *
+ * Props:
+ * - None
+ *
+ * Description:
+ * The sidebar provides navigation links to different sections of the app,
+ * with icons and hover tooltips for each menu item.
+ */
+
+"use client";
 
 import Link from 'next/link';
 import {
@@ -9,7 +21,7 @@ import {
     TbTags,
     TbReportMoney
 } from 'react-icons/tb';
-import {usePathname} from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
     { icon: <TbHome size={24} />, label: "Home", href: "/" },
@@ -24,7 +36,7 @@ export default function Sidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className={`h-full text-white flex flex-col py-4 w-16 transition-all`}>
+        <aside className="h-full text-white flex flex-col py-4 w-16 transition-all">
             <div className="flex items-center gap-4 px-4 py-3">
                 <TbLayoutDashboard size={24} className="text-indigo-300" />
             </div>
@@ -39,7 +51,7 @@ export default function Sidebar() {
                             }`}
                         >
                             <div className="relative flex justify-center items-center">
-                                <div className={`text-${pathname === item.href ? 'white' : 'gray-900'}`}>
+                                <div className={`${pathname === item.href ? 'text-white' : 'text-gray-900'}`}>
                                     {item.icon}
                                 </div>
                                 <span className="absolute ml-2 left-12 z-10 hidden group-hover:inline-block bg-gray-900

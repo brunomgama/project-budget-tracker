@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Import necessary components and hooks.
+ * - `DialogHeader`, `DialogTitle`, and `DialogDescription` for displaying the form dialog header.
+ * - Form components for handling form inputs, validation, and submission.
+ * - `useForm` from `react-hook-form` for form management.
+ * - `useEffect` for side effects to handle fetching manager details during updates.
+ */
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -14,20 +21,33 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {useEffect} from "react";
+import { useEffect } from "react";
 
+/**
+ * Define form schema for validation using Zod.
+ * - Requires the manager name to be a non-empty string.
+ */
 const FormSchema = z.object({
     name: z.string().nonempty("Manager name is required"),
 });
 
-export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate, refreshData}: {
+/**
+ * Main component for creating or updating a manager.
+ * - Props:
+ *   - `selectedItems`: Set of selected manager IDs for updates.
+ *   - `handleCreateOrUpdate`: Function to close the form dialog.
+ *   - `refreshData`: Function to refresh the manager list after changes.
+ */
+export default function CreateUpdateManager({ selectedItems, handleCreateOrUpdate, refreshData }: {
     selectedItems: Set<number>;
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    // Check if this is an update operation and get the selected manager ID.
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
+    // Initialize form with default values and validation schema.
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -35,6 +55,10 @@ export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate
         },
     });
 
+    /**
+     * Fetch manager details for update operations.
+     * - Pre-fills the form with existing manager data if an ID is selected.
+     */
     useEffect(() => {
         if (isUpdate && selectedId) {
             const fetchManager = async () => {
@@ -55,6 +79,11 @@ export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate
         }
     }, [isUpdate, selectedId, form]);
 
+    /**
+     * Handle form submission for creating or updating a manager.
+     * - Sends a POST request for creating a new manager.
+     * - Sends a PUT request for updating an existing manager.
+     */
     const onSubmit = async (data: z.infer<typeof FormSchema>) => {
         try {
             const method = isUpdate ? "PUT" : "POST";
@@ -74,7 +103,6 @@ export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate
                 throw new Error(result.error || "Failed to save manager");
             }
 
-            console.log("Manager saved successfully:", result);
             refreshData();
             handleCreateOrUpdate(false);
         } catch (error) {
@@ -82,6 +110,11 @@ export default function CreateUpdateManager({selectedItems, handleCreateOrUpdate
         }
     };
 
+    /**
+     * Render the form inside a dialog.
+     * - Includes a single field for entering the manager's name.
+     * - Provides "Cancel" and "Submit/Update" buttons.
+     */
     return (
         <DialogHeader>
             <DialogTitle>{isUpdate ? "Update Manager" : "Create New Manager"}</DialogTitle>

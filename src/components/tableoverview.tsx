@@ -1,3 +1,18 @@
+/**
+ * TableOverview Component
+ *
+ * Displays a paginated table using `InfoTable` and `Pagination` components.
+ *
+ * Props:
+ * - `data`: Array of data objects to display.
+ * - `headers`: Configuration for the table headers (field, label, type).
+ * - `currentPage`: The current active page.
+ * - `totalPages`: Total number of pages.
+ * - `selectedItems`: Set of selected item IDs.
+ * - `handleSelectItem`: Function to handle item selection.
+ * - `setCurrentPage`: Function to update the current page.
+ */
+
 import InfoTable from "@/components/infotable";
 import Pagination from "@/components/pagination";
 
@@ -10,13 +25,13 @@ export default function TableOverview({
                                           handleSelectItem,
                                           setCurrentPage,
                                       }: {
-                                            data: any[];
-                                            headers: { field: string; label: string; type: string }[];
-                                            currentPage: number;
-                                            totalPages: number;
-                                            selectedItems: Set<number>;
-                                            handleSelectItem: (id: number) => void;
-                                            setCurrentPage: (page: number) => void;
+    data: any[];
+    headers: { field: string; label: string; type: string }[];
+    currentPage: number;
+    totalPages: number;
+    selectedItems: Set<number>;
+    handleSelectItem: (id: number) => void;
+    setCurrentPage: (page: number) => void;
 }) {
     const handlePreviousPage = () => {
         const newPage = Math.max(currentPage - 1, 1);
@@ -38,6 +53,7 @@ export default function TableOverview({
                     onSelectItem={handleSelectItem}
                 />
             </div>
+
             <div className="mt-4">
                 <Pagination
                     currentPage={currentPage}

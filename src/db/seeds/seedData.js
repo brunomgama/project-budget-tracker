@@ -3,7 +3,7 @@ const db = require('../database');
 db.serialize(() => {
     // Insert sample data into Project table
     db.run(`
-        INSERT INTO project (name) VALUES
+        INSERT OR IGNORE INTO project (name) VALUES
         ('Infrastructure Upgrade'),
         ('Client Onboarding System'),
         ('Internal Training Initiative'),
@@ -13,7 +13,7 @@ db.serialize(() => {
 
     // Insert sample data into Manager table
     db.run(`
-        INSERT INTO manager (name) VALUES
+        INSERT OR IGNORE INTO manager (name) VALUES
         ('Alice Smith'),
         ('Bob Johnson'),
         ('Catherine Lee'),
@@ -22,7 +22,7 @@ db.serialize(() => {
 
     // Insert sample data into Category table
     db.run(`
-        INSERT INTO category (name) VALUES
+        INSERT OR IGNORE INTO category (name) VALUES
         ('Consultancy'),
         ('Software Licenses'),
         ('Operations'),
@@ -35,7 +35,7 @@ db.serialize(() => {
 
     // Insert sample data into Budget table
     db.run(`
-        INSERT INTO budget (name, totalamount, projectid, categoryid) VALUES
+        INSERT OR IGNORE INTO budget (name, totalamount, projectid, categoryid) VALUES
         ('Infrastructure Budget', 75000, 1, 7),
         ('Software Subscriptions', 30000, 2, 2),
         ('Employee Workshops', 12000, 3, 6),
@@ -46,7 +46,7 @@ db.serialize(() => {
 
     // Insert sample data into Expense table
     db.run(`
-        INSERT INTO expense (amount, description, date, budgetid, categoryid) VALUES
+        INSERT OR IGNORE INTO expense (amount, description, date, budgetid, categoryid) VALUES
         -- January
         (1500.00, 'Network switches and routers', '2025-01-05', 1, 7),
         (2000.00, 'Software license renewal', '2025-01-10', 2, 2),

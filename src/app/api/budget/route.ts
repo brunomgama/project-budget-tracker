@@ -3,6 +3,7 @@ import { Budget } from '@/types/interfaces/interface';
 const db = require('../../../db/database');
 import sqlite3 from 'sqlite3';
 
+// GET request to fetch all budgets from the database.
 export async function GET(req: NextRequest) {
     try {
         const budgets = await new Promise<Budget[]>((resolve, reject) => {
@@ -23,12 +24,14 @@ export async function GET(req: NextRequest) {
     }
 }
 
+// DELETE request to remove one or more budgets by their IDs.
 export async function DELETE(req: NextRequest) {
     try {
         const body = await req.json();
         const { ids } = body;
 
-        if (!ids || ids.length === 0) {
+        // Validate that the 'ids' array is provided and contains at least one ID.
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return NextResponse.json({ error: 'No IDs provided for deletion' }, { status: 400 });
         }
 
@@ -37,16 +40,16 @@ export async function DELETE(req: NextRequest) {
 
         const result = await new Promise<{ message: string; changes: number }>((resolve, reject) => {
             db.run(sql, ids, function (this: sqlite3.RunResult, err: { message: string }) {
-                    if (err) {
-                        console.error('Delete Error:', err.message);
-                        reject(err);
-                    } else {
-                        resolve({ message: `${this.changes} budget(s) deleted`, changes: this.changes });
-                    }
+                if (err) {
+                    console.error('Delete Error:', err.message);
+                    reject(err);
+                } else {
+                    resolve({ message: `${this.changes} budget(s) deleted`, changes: this.changes });
                 }
-            );
+            });
         });
 
+        // Return the number of deleted rows.
         return NextResponse.json(result);
     } catch (error) {
         console.error('Database error:', error);
@@ -54,15 +57,20 @@ export async function DELETE(req: NextRequest) {
     }
 }
 
+// POST request to create a new budget.
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { name, totalamount, projectid, categoryid } = body;
 
+        if (!name || totalamount === undefined || !projectid || !categoryid) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
         const sql = `INSERT INTO budget (name, totalamount, projectid, categoryid) VALUES (?, ?, ?, ?)`;
 
-        const result = await new Promise((resolve, reject) => {
-            db.run(sql, [name, totalamount, projectid, categoryid], function (this: sqlite3.RunResult, err: { message: any; }) {
+        const result = await new Promise<{ message: string; id: number }>((resolve, reject) => {
+            db.run(sql, [name, totalamount, projectid, categoryid], function (this: sqlite3.RunResult, err: { message: string }) {
                 if (err) {
                     console.error("Insert Error:", err.message);
                     reject(err);

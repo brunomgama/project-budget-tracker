@@ -1,3 +1,15 @@
+/**
+ * TabSelection Component
+ *
+ * Displays a tab interface with three main sections: Overview, Analytics, and Reports.
+ * Each section contains actions and info cards relevant to the selected tab.
+ *
+ * Props:
+ * - `activeTab`: Currently selected tab.
+ * - `setActiveTab`: Function to update the selected tab.
+ * - `refreshOverviewData`: Function to refresh data when changes occur.
+ */
+
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,56 +33,46 @@ export default function TabSelection({
     setActiveTab: (tab: string) => void;
     refreshOverviewData: () => void;
 }) {
+    // State for fetched project, budget, and expense data
     const [projectData, setProjectData] = useState<APIProjectResponse | null>(null);
     const [budgetData, setBudgetData] = useState<APIBudgetResponse | null>(null);
     const [expenseData, setExpenseData] = useState<APIExpenseResponse | null>(null);
+
+    // Dialog state to handle open/close for project, budget, and expense forms
     const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
     const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
     const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
 
     useEffect(() => {
         refreshData();
-
     }, []);
 
     const refreshData = () => {
         fetch("/api/project")
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
+                if (!response.ok) throw new Error("Failed to fetch projects");
                 return response.json();
             })
             .then((data) => setProjectData(data))
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-            });
+            .catch((error) => console.error("Error fetching projects:", error));
 
         fetch("/api/budget")
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
+                if (!response.ok) throw new Error("Failed to fetch budgets");
                 return response.json();
             })
             .then((data) => setBudgetData(data))
-            .catch((error) => {
-                console.error("Error refreshing data:", error);
-            });
+            .catch((error) => console.error("Error fetching budgets:", error));
 
         fetch("/api/expense")
             .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
+                if (!response.ok) throw new Error("Failed to fetch expenses");
                 return response.json();
             })
             .then((data) => setExpenseData(data))
-            .catch((error) => {
-                console.error("Error refreshing data:", error);
-            });
+            .catch((error) => console.error("Error fetching expenses:", error));
 
-        refreshOverviewData()
+        refreshOverviewData();
     };
 
     if (!projectData || !budgetData || !expenseData) {
@@ -95,10 +97,13 @@ export default function TabSelection({
 
                     {activeTab === "overview" && (
                         <div className="flex gap-2">
-                            <Dialog open={isProjectDialogOpen} onOpenChange={(open) => {
-                                setIsProjectDialogOpen(open);
-                                if (!open) refreshOverviewData();
-                            }}>
+                            <Dialog
+                                open={isProjectDialogOpen}
+                                onOpenChange={(open) => {
+                                    setIsProjectDialogOpen(open);
+                                    if (!open) refreshOverviewData();
+                                }}
+                            >
                                 <DialogTrigger asChild>
                                     <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                                         <TbLayoutDashboard />
@@ -114,10 +119,13 @@ export default function TabSelection({
                                 </DialogContent>
                             </Dialog>
 
-                            <Dialog open={isBudgetDialogOpen} onOpenChange={(open) => {
-                                setIsBudgetDialogOpen(open);
-                                if (!open) refreshOverviewData();
-                            }}>
+                            <Dialog
+                                open={isBudgetDialogOpen}
+                                onOpenChange={(open) => {
+                                    setIsBudgetDialogOpen(open);
+                                    if (!open) refreshOverviewData();
+                                }}
+                            >
                                 <DialogTrigger asChild>
                                     <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                                         <TbCurrencyDollar />
@@ -133,10 +141,13 @@ export default function TabSelection({
                                 </DialogContent>
                             </Dialog>
 
-                            <Dialog open={isExpenseDialogOpen} onOpenChange={(open) => {
-                                setIsExpenseDialogOpen(open);
-                                if (!open) refreshOverviewData();
-                            }}>
+                            <Dialog
+                                open={isExpenseDialogOpen}
+                                onOpenChange={(open) => {
+                                    setIsExpenseDialogOpen(open);
+                                    if (!open) refreshOverviewData();
+                                }}
+                            >
                                 <DialogTrigger asChild>
                                     <Button className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center gap-2">
                                         <TbReportMoney />
@@ -158,9 +169,24 @@ export default function TabSelection({
                 {activeTab === "overview" && (
                     <TabsContent value="overview">
                         <div className="flex flex-wrap gap-4 mt-6">
-                            <InfoCard title="Total Projects" value={projectData?.projects.length.toString()} icon={<TbLayoutDashboard />} href="/projects" />
-                            <InfoCard title="Total Budgets" value={budgetData?.budgets.length.toString()} icon={<TbCurrencyDollar />} href="/budgets" />
-                            <InfoCard title="Total Expenses" value={expenseData?.expenses.length.toString()} icon={<TbTags />} href="/expenses" />
+                            <InfoCard
+                                title="Total Projects"
+                                value={projectData?.projects.length.toString()}
+                                icon={<TbLayoutDashboard />}
+                                href="/projects"
+                            />
+                            <InfoCard
+                                title="Total Budgets"
+                                value={budgetData?.budgets.length.toString()}
+                                icon={<TbCurrencyDollar />}
+                                href="/budgets"
+                            />
+                            <InfoCard
+                                title="Total Expenses"
+                                value={expenseData?.expenses.length.toString()}
+                                icon={<TbTags />}
+                                href="/expenses"
+                            />
                         </div>
                     </TabsContent>
                 )}

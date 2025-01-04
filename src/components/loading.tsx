@@ -1,3 +1,8 @@
+/**
+ * `Loading` component:
+ * A simple animated loading indicator displayed at the center of the screen.
+ * - Uses SVG path animation to create a looping stroke-dash effect.
+ */
 export default function Loading() {
     return (
         <div className="flex items-center justify-center h-32">

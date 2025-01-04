@@ -1,12 +1,21 @@
 "use client";
 
+/**
+ * Import necessary hooks and components for the page.
+ * - `useEffect` and `useState` for state management and side effects.
+ * - Components like `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI elements.
+ */
 import { useEffect, useState } from "react";
-import {APIBudgetResponse, Budget} from "@/types/interfaces/interface";
+import { APIBudgetResponse, Budget } from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
 import InfoTable from "@/components/infotable";
 
+/**
+ * Define the headers for the budget table.
+ * - Each header object contains the `field`, `label`, and `type`.
+ */
 const headers = [
     { field: "id", label: "Budget Id", type: "number" },
     { field: "name", label: "Name", type: "string" },
@@ -15,25 +24,40 @@ const headers = [
     { field: "categoryid", label: "Category", type: "string" },
 ];
 
+/**
+ * Main component that displays the budget list.
+ * - Handles data fetching, filtering, sorting, and pagination.
+ */
 export default function Projects() {
+    // State variables for storing budget data, related projects, and categories.
     const [data, setData] = useState<Budget[]>([]);
     const [projects, setProjects] = useState<{ [key: number]: string }>({});
-    const [category, setCategory] = useState<{ [key: number]: string }>({});
+    const [categories, setCategories] = useState<{ [key: number]: string }>({});
     const [filteredData, setFilteredData] = useState<Budget[]>([]);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [error, setError] = useState<string | null>(null);
 
+    // State variables for pagination and sorting.
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const [searchQuery, setSearchQuery] = useState("");
     const itemsPerPage = 15;
 
+    /**
+     * `useEffect` to trigger data fetching on component mount.
+     * - Fetches budgets, projects, and categories.
+     */
     useEffect(() => {
         fetchData();
         fetchProjects();
-        fetchCategory();
+        fetchCategories();
     }, []);
 
+    /**
+     * Fetch budget data from the API.
+     * - Updates `data` and `filteredData` states.
+     * - Handles API errors and updates the `error` state if the fetch fails.
+     */
     const fetchData = () => {
         fetch("/api/budget")
             .then((response) => {
@@ -53,6 +77,10 @@ export default function Projects() {
             });
     };
 
+    /**
+     * Fetch project names to display in the table.
+     * - Maps project IDs to names for display purposes.
+     */
     const fetchProjects = () => {
         fetch("/api/project")
             .then((response) => {
@@ -73,7 +101,11 @@ export default function Projects() {
             });
     };
 
-    const fetchCategory = () => {
+    /**
+     * Fetch category names to display in the table.
+     * - Maps category IDs to names for display purposes.
+     */
+    const fetchCategories = () => {
         fetch("/api/category")
             .then((response) => {
                 if (!response.ok) {
@@ -86,20 +118,30 @@ export default function Projects() {
                 data.categories.forEach((category) => {
                     categoryMap[category.id] = category.name;
                 });
-                setCategory(categoryMap);
+                setCategories(categoryMap);
             })
             .catch((error) => {
-                console.error("Error fetching projects:", error);
+                console.error("Error fetching categories:", error);
             });
     };
 
+    /**
+     * Handle search input to filter the budget list.
+     * - Filters budgets based on the search query (case-insensitive).
+     */
     const handleSearch = (query: string) => {
         setSearchQuery(query);
-        const filtered = data.filter((budget) => budget.name.toLowerCase().includes(query.toLowerCase()));
+        const filtered = data.filter((budget) =>
+            budget.name.toLowerCase().includes(query.toLowerCase())
+        );
         setFilteredData(filtered);
         setCurrentPage(1);
     };
 
+    /**
+     * Handle sorting by the budget name field.
+     * - Toggles between ascending and descending order.
+     */
     const handleSort = () => {
         const sortedData = [...filteredData].sort((a, b) => {
             const comparison = a.name.localeCompare(b.name);
@@ -109,22 +151,34 @@ export default function Projects() {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     };
 
+    /**
+     * Handle selecting a budget item.
+     * - Allows single selection for updates.
+     */
     const handleSelectItem = (id: number) => {
         if (selectedItems.has(id)) {
-            setSelectedItems(new Set())
+            setSelectedItems(new Set());
         } else {
-            setSelectedItems(new Set([id]))
+            setSelectedItems(new Set([id]));
         }
     };
 
+    /**
+     * Pagination calculations:
+     * - Calculate the total number of pages.
+     * - Slice the data based on the current page and items per page.
+     */
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage).map((budget) => ({
         ...budget,
         projectid: projects[budget.projectid] || "Unknown Project",
-        categoryid: category[budget.categoryid] || "Unknown Category",
+        categoryid: categories[budget.categoryid] || "Unknown Category",
     }));
 
+    /**
+     * If an error occurs during data fetching, display the error message.
+     */
     if (error) {
         return (
             <p className="text-center text-sm font-medium" style={{ color: "var(--color-error)" }}>
@@ -133,6 +187,10 @@ export default function Projects() {
         );
     }
 
+    /**
+     * Render the budget page.
+     * - Includes a search bar, table action buttons, the budget table, and pagination.
+     */
     return (
         <div className="flex flex-col min-h-[calc(100vh-64px)]">
             <div className="flex justify-between">
@@ -160,5 +218,4 @@ export default function Projects() {
             />
         </div>
     );
-
 }

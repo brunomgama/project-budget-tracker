@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Import necessary components and hooks.
+ * - `TabSelection` for managing tab-based navigation.
+ * - `Overview`, `Analytics`, and `Reports` components for displaying project-related data.
+ * - `useState` and `useEffect` for managing state and side effects.
+ */
 import TabSelection from "@/components/tabSelection";
 import { useEffect, useState } from "react";
 import {
@@ -13,13 +19,22 @@ import Overview from "@/components/overview";
 import Analytics from "@/components/analytics";
 import Reports from "@/components/reports";
 
+/**
+ * Define headers for project data table.
+ * - Specifies the field name, label, and data type for display in the `Overview`, `Analytics`, and `Reports`.
+ */
 const headers = [
     { field: "name", label: "Project", type: "string" },
     { field: "budgetTotal", label: "Budget Total (€)", type: "money" },
     { field: "expenseTotal", label: "Expense Total (€)", type: "money" },
 ];
 
+/**
+ * Main component for the HomePage, displaying project data in tabs (Overview, Analytics, Reports).
+ * - Handles data fetching for projects, budgets, expenses, and categories.
+ */
 export default function HomePage() {
+    // State variables for storing and managing project-related data.
     const [data, setData] = useState<Project[]>([]);
     const [budgets, setBudgets] = useState<Budget[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -33,21 +48,31 @@ export default function HomePage() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
 
+    /**
+     * Fetch initial data (projects and categories) when the component mounts.
+     */
     useEffect(() => {
-        fetchData(); // Initial fetch for projects and totals
-        fetchCategories(); // Fetch categories
+        fetchData();
+        fetchCategories();
     }, []);
 
+    /**
+     * Fetch budgets and expenses when a project is selected.
+     */
     useEffect(() => {
         if (selectedItems.size > 0) {
             const projectId = Array.from(selectedItems)[0];
-            fetchBudgets(projectId); // Fetch budgets when a project is selected
+            fetchBudgets(projectId);
         } else {
             setBudgets([]);
             setExpenses([]);
         }
     }, [selectedItems]);
 
+    /**
+     * Fetch project data from the API.
+     * - Includes calculation of total budgets and expenses for each project.
+     */
     const fetchData = () => {
         fetch("/api/project")
             .then((response) => {
@@ -59,6 +84,7 @@ export default function HomePage() {
             .then(async (data: APIProjectResponse) => {
                 const projects = data.projects;
 
+                // Fetch budgets and expenses for each project and calculate totals.
                 const projectsWithTotals = await Promise.all(
                     projects.map(async (project) => {
                         const budgetResponse = await fetch(`/api/budget/project/${project.id}`);
@@ -66,7 +92,6 @@ export default function HomePage() {
                         const budgets: Budget[] = budgetData.budgets || [];
 
                         const budgetTotal = budgets.reduce((sum: number, b: Budget) => sum + b.totalamount, 0);
-
                         const budgetIds = budgets.map((b: Budget) => b.id);
                         let expenseTotal = 0;
 
@@ -92,6 +117,9 @@ export default function HomePage() {
             });
     };
 
+    /**
+     * Fetch budgets for the selected project.
+     */
     const fetchBudgets = async (projectId: number) => {
         try {
             const response = await fetch(`/api/budget/project/${projectId}`);
@@ -115,6 +143,9 @@ export default function HomePage() {
         }
     };
 
+    /**
+     * Fetch expenses for the provided budget IDs.
+     */
     const fetchExpenses = async (budgetIds: number[]) => {
         try {
             const response = await fetch(`/api/expense/budgets?ids=${budgetIds.join(",")}`);
@@ -130,6 +161,9 @@ export default function HomePage() {
         }
     };
 
+    /**
+     * Fetch categories from the API.
+     */
     const fetchCategories = async () => {
         try {
             const response = await fetch("/api/category");
@@ -143,12 +177,19 @@ export default function HomePage() {
         }
     };
 
+    /**
+     * Refresh data when the "Refresh" button is clicked.
+     */
     const refreshOverviewData = async () => {
         console.log("Refreshing Overview Data...");
         await fetchData();
         await fetchCategories();
     };
 
+    /**
+     * Handle selection of a project item.
+     * - Allows only one project to be selected at a time.
+     */
     const handleSelectItem = (id: number) => {
         if (selectedItems.has(id)) {
             setSelectedItems(new Set());
@@ -160,16 +201,28 @@ export default function HomePage() {
         }
     };
 
+    /**
+     * Calculate total budget, total expenses, and the percentage consumed for the selected project.
+     */
     const totalBudget = budgets.reduce((sum, budget) => sum + budget.totalamount, 0);
     const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     const percentageConsumed = totalBudget > 0 ? (totalExpenses / totalBudget) * 100 : 0;
 
+    /**
+     * Determine chart fill color based on percentage consumed.
+     */
     const colorGraphFill = percentageConsumed < 25 ? "hsl(var(--chart-2))" : (percentageConsumed < 50 ? "hsl(var(--chart-4))" : "hsl(var(--chart-1))");
 
+    /**
+     * Chart data for displaying budget consumption.
+     */
     const chartData = [
         { label: "Consumed", percentage: 100 - Math.round(percentageConsumed), value: totalExpenses, fill: colorGraphFill },
     ];
 
+    /**
+     * Render the home page with tabs for "Overview", "Analytics", and "Reports".
+     */
     return (
         <div className="container mx-auto">
             <TabSelection

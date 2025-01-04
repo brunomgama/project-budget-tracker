@@ -14,6 +14,11 @@ import {
 import DatePickerSection from "@/components/datepickersection";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Reports Component:
+ * Displays the detailed report view of budgets and expenses.
+ * Provides category filtering, date range selection, and reset functionality.
+ */
 export default function Reports({
                                     paginatedData,
                                     headers,
@@ -37,9 +42,11 @@ export default function Reports({
     categories: Category[];
     budgets: Budget[];
 }) {
+    // Get the selected project and its details
     const selectedProjectId = Array.from(selectedItems)[0];
     const selectedProject = paginatedData.find((project) => project.id === selectedProjectId);
 
+    // State for filtered budgets and expenses
     const [filteredBudgets, setFilteredBudgets] = useState<Budget[]>([]);
     const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -48,9 +55,11 @@ export default function Reports({
 
     useEffect(() => {
         if (selectedProjectId) {
+            // Filter budgets belonging to the selected project
             const projectBudgets = budgets.filter((budget) => budget.projectid === selectedProjectId);
             setFilteredBudgets(projectBudgets);
 
+            // Filter expenses belonging to the filtered budgets
             const expenseData = expenses.filter((expense) =>
                 projectBudgets.some((budget) => budget.id === expense.budgetid)
             );
@@ -61,6 +70,9 @@ export default function Reports({
         }
     }, [selectedProjectId, budgets, expenses]);
 
+    /**
+     * Filter expenses based on selected category and date range.
+     */
     const filteredExpenseDetails = filteredExpenses.filter((expense) => {
         const matchesCategory = selectedCategory ? expense.categoryid === selectedCategory : true;
         const withinDateRange =
@@ -69,6 +81,9 @@ export default function Reports({
         return matchesCategory && withinDateRange;
     });
 
+    /**
+     * Resets all filters (category and date range).
+     */
     const resetFilters = () => {
         setSelectedCategory(null);
         setStartDate(null);

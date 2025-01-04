@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import sqlite3 from "sqlite3";
+import sqlite3 from 'sqlite3';
 const db = require('../../../../db/database');
 
+// GET request to fetch category details by ID.
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
         const { id } = params;
 
-        if (!id) {
-            return NextResponse.json({ error: "No ID provided" }, { status: 400 });
+        if (!id || isNaN(Number(id))) {
+            return NextResponse.json({ error: "Invalid or missing ID" }, { status: 400 });
         }
-
-        console.log(`Fetching category for ID: ${id}`);
 
         const category = await new Promise<any>((resolve, reject) => {
             db.get('SELECT * FROM category WHERE id = ?', [id], (err: Error, row: any) => {
@@ -34,14 +33,18 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 }
 
+// PUT request to update a category by ID.
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const id = params.id;
         const body = await req.json();
         const { name } = body;
 
-        if (!name) {
-            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        if (!id || isNaN(Number(id))) {
+            return NextResponse.json({ error: "Invalid or missing ID" }, { status: 400 });
+        }
+        if (!name || typeof name !== 'string') {
+            return NextResponse.json({ error: "Invalid or missing category name" }, { status: 400 });
         }
 
         const sql = `UPDATE category SET name = ? WHERE id = ?`;
@@ -57,6 +60,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
             });
         });
 
+        // Return 404 if no rows were updated (category not found).
         if (result.changes === 0) {
             return NextResponse.json({ error: "Category not found or not updated" }, { status: 404 });
         }

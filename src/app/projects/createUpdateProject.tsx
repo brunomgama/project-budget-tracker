@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Import necessary components and hooks.
+ * - `DialogHeader`, `DialogTitle`, and `DialogDescription` for form dialog structure.
+ * - Form components for input handling and validation.
+ * - `useForm` from `react-hook-form` for managing form state and submission.
+ * - `useEffect` for side effects to fetch project details when updating.
+ */
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -14,20 +21,33 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {useEffect} from "react";
+import { useEffect } from "react";
 
+/**
+ * Define form schema for validation using Zod.
+ * - Requires the project name to be a non-empty string.
+ */
 const FormSchema = z.object({
     name: z.string().nonempty("Project name is required"),
 });
 
-export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate, refreshData}: {
+/**
+ * Main component for creating or updating a project.
+ * - Props:
+ *   - `selectedItems`: Set of selected project IDs for updates.
+ *   - `handleCreateOrUpdate`: Function to close the form dialog.
+ *   - `refreshData`: Function to refresh the project list after changes.
+ */
+export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdate, refreshData }: {
     selectedItems: Set<number>;
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    // Check if this is an update operation and get the selected project ID.
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
+    // Initialize form with default values and validation schema.
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -35,6 +55,10 @@ export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate
         },
     });
 
+    /**
+     * Fetch project details for update operations.
+     * - Pre-fills the form with existing project data if an ID is selected.
+     */
     useEffect(() => {
         if (isUpdate && selectedId) {
             const fetchProject = async () => {
@@ -55,6 +79,11 @@ export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate
         }
     }, [isUpdate, selectedId, form]);
 
+    /**
+     * Handle form submission for creating or updating a project.
+     * - Sends a POST request for creating a new project.
+     * - Sends a PUT request for updating an existing project.
+     */
     const onSubmit = async (data: z.infer<typeof FormSchema>) => {
         try {
             const method = isUpdate ? "PUT" : "POST";
@@ -75,7 +104,6 @@ export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate
                 throw new Error(result.error || "Failed to save project");
             }
 
-            console.log("Project saved successfully:", result);
             refreshData();
             handleCreateOrUpdate(false);
         } catch (error) {
@@ -83,6 +111,11 @@ export default function CreateUpdateProject({selectedItems, handleCreateOrUpdate
         }
     };
 
+    /**
+     * Render the form inside a dialog.
+     * - Includes a single field for entering the project's name.
+     * - Provides "Cancel" and "Submit/Update" buttons.
+     */
     return (
         <DialogHeader>
             <DialogTitle>{isUpdate ? "Update Project" : "Create New Project"}</DialogTitle>

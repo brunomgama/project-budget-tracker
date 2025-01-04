@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Import necessary components and hooks.
+ * - Dialog components for the header, title, and description.
+ * - Button for form actions.
+ * - Zod for schema validation.
+ * - useForm from React Hook Form for form control.
+ */
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -14,27 +21,49 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { useEffect, useState } from "react";
-import {Project} from "@/types/interfaces/interface";
-import {Input} from "@/components/ui/input";
+import { Project } from "@/types/interfaces/interface";
+import { Input } from "@/components/ui/input";
 
+/**
+ * Define the form schema using Zod to validate form input.
+ * - name: required string.
+ * - totalamount: required positive number.
+ * - projectid: required positive number for the selected project.
+ * - categoryid: required positive number for the selected category.
+ */
 const FormSchema = z.object({
     name: z.string().nonempty("Name is required"),
     totalamount: z.coerce.number().positive("Total amount must be a positive number"),
     projectid: z.coerce.number().positive("Project ID must be a positive number"),
-    categoryid: z.coerce.number().positive("Project ID must be a positive number"),
+    categoryid: z.coerce.number().positive("Category ID must be a positive number"),
 });
 
-export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate, refreshData }: {
+/**
+ * Component for creating or updating a budget.
+ * Props:
+ * - selectedItems: set of selected budget IDs.
+ * - handleCreateOrUpdate: function to close the dialog and refresh the data.
+ * - refreshData: function to refresh the list of budgets after an operation.
+ */
+export default function CreateUpdateBudget({
+                                               selectedItems,
+                                               handleCreateOrUpdate,
+                                               refreshData,
+                                           }: {
     selectedItems: Set<number>;
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
+    // Determine whether we are updating an existing budget or creating a new one.
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
+    // State to store the list of projects and categories.
     const [projects, setProjects] = useState<Project[]>([]);
     const [categories, setCategories] = useState<Project[]>([]);
+    const [loading, setLoading] = useState(false);
 
+    // Initialize the form with default values and schema validation.
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -45,6 +74,11 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
         },
     });
 
+    /**
+     * Fetch the list of projects and categories when the component mounts.
+     * - Fetches data from `/api/project` and `/api/category`.
+     * - Sets appropriate form errors if the fetch fails.
+     */
     useEffect(() => {
         const fetchProjects = async () => {
             try {
@@ -58,6 +92,7 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                 setProjects(data.projects);
             } catch (error) {
                 console.error("Error fetching projects:", error);
+                form.setError("projectid", { message: "Error loading projects." });
             }
         };
 
@@ -67,12 +102,13 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                 const data = await res.json();
 
                 if (!res.ok) {
-                    throw new Error("Failed to fetch category");
+                    throw new Error("Failed to fetch categories");
                 }
 
                 setCategories(data.categories);
             } catch (error) {
-                console.error("Error fetching projects:", error);
+                console.error("Error fetching categories:", error);
+                form.setError("categoryid", { message: "Error loading categories." });
             }
         };
 
@@ -80,11 +116,14 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
         fetchCategories();
     }, []);
 
+    /**
+     * If updating an existing budget, fetch the budget details.
+     * - Populates the form with the existing budget data.
+     */
     useEffect(() => {
         if (isUpdate && selectedId) {
             const fetchBudget = async () => {
                 try {
-                    console.log(`Fetching budget for ID: ${selectedId}`);
                     const res = await fetch(`/api/budget/${selectedId}`);
                     if (!res.ok) {
                         throw new Error(`Failed to fetch budget: ${res.statusText}`);
@@ -99,17 +138,24 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                             categoryid: data.budget.categoryid,
                         });
                     } else {
-                        console.error("Budget not found");
+                        form.setError("name", { message: "Budget not found." });
                     }
                 } catch (error) {
                     console.error("Error fetching budget:", error);
+                    form.setError("name", { message: "Error loading budget details." });
                 }
             };
             fetchBudget();
         }
     }, [isUpdate, selectedId, form]);
 
+    /**
+     * Handle form submission to create or update a budget.
+     * - Sends a POST request if creating a new budget.
+     * - Sends a PUT request if updating an existing budget.
+     */
     const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+        setLoading(true);
         try {
             const method = isUpdate ? "PUT" : "POST";
             const url = isUpdate ? `/api/budget/${selectedId}` : `/api/budget`;
@@ -133,9 +179,16 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
             handleCreateOrUpdate(false);
         } catch (error) {
             console.error("Error saving budget:", error);
+            form.setError("name", { message: "Failed to save budget. Please try again." });
+        } finally {
+            setLoading(false);
         }
     };
 
+    /**
+     * Render the budget form inside a dialog.
+     * - Includes fields for name, total amount, project, and category.
+     */
     return (
         <DialogHeader>
             <DialogTitle>{isUpdate ? "Update Budget" : "Create New Budget"}</DialogTitle>
@@ -151,9 +204,7 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                             <FormItem>
                                 <FormLabel>Name</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="text"
-                                        placeholder="Enter budget name"
+                                    <Input type="text" placeholder="Enter budget name"
                                         {...field}
                                     />
                                 </FormControl>
@@ -166,22 +217,16 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                         name="totalamount"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Total Amount</FormLabel>
+                                <FormLabel>Total Amount (€)</FormLabel>
                                 <FormControl>
-                                    <div className="flex items-center border border-gray-300 rounded-md p-2">
-                                        <Input
-                                            type="number"
-                                            placeholder="Enter total amount"
-                                            {...field}
-                                            className={"w-full mr-2"}
-                                        />
-                                        <span className="mr-2 text-gray-500">€</span>
-                                    </div>
+                                    <Input type="number" placeholder="Enter total amount"
+                                        {...field}
+                                        className="w-full"/>
                                 </FormControl>
-                                <FormMessage/>
+                                <FormMessage />
                             </FormItem>
-                            )}
-                        />
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="projectid"
@@ -235,11 +280,16 @@ export default function CreateUpdateBudget({ selectedItems, handleCreateOrUpdate
                         )}
                     />
                     <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => handleCreateOrUpdate(false)}>
+                        <Button type="button" variant="outline"
+                            onClick={() => {
+                                form.reset();
+                                handleCreateOrUpdate(false);
+                            }}
+                        >
                             Cancel
                         </Button>
-                        <Button type="submit" className="bg-primaryAccent hover:bg-primaryText text-white">
-                            {isUpdate ? "Update" : "Submit"}
+                        <Button type="submit" className="bg-primaryAccent hover:bg-primaryText text-white" disabled={loading}>
+                            {loading ? "Saving..." : isUpdate ? "Update" : "Submit"}
                         </Button>
                     </div>
                 </form>
