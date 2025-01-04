@@ -49,7 +49,7 @@ export default function InfoTable(
                             {headers.map((header) => (
                                 <TableCell key={header.field}>
                                     {header.type === "money"
-                                        ? `${parseFloat(row[header.field]).toFixed(2)} €`
+                                        ? `${parseFloat(row[header.field] || 0).toFixed(2)} €`
                                         : row[header.field] ?? "N/A"}
                                 </TableCell>
                             ))}

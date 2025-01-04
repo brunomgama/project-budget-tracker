@@ -91,9 +91,6 @@ export default function TabSelection({
                         <TabsTrigger value="reports" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                             Reports
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
-                            Notifications
-                        </TabsTrigger>
                     </TabsList>
 
                     {activeTab === "overview" && (

@@ -6,7 +6,8 @@ import {
     APIProjectResponse,
     Project,
     Budget,
-    Expense, Category,
+    Expense,
+    Category,
 } from "@/types/interfaces/interface";
 import Overview from "@/components/overview";
 import Analytics from "@/components/analytics";
@@ -14,6 +15,8 @@ import Reports from "@/components/reports";
 
 const headers = [
     { field: "name", label: "Project", type: "string" },
+    { field: "budgetTotal", label: "Budget Total (€)", type: "money" },
+    { field: "expenseTotal", label: "Expense Total (€)", type: "money" },
 ];
 
 export default function HomePage() {
@@ -31,8 +34,19 @@ export default function HomePage() {
     const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
 
     useEffect(() => {
-        fetchData();
+        fetchData(); // Initial fetch for projects and totals
+        fetchCategories(); // Fetch categories
     }, []);
+
+    useEffect(() => {
+        if (selectedItems.size > 0) {
+            const projectId = Array.from(selectedItems)[0];
+            fetchBudgets(projectId); // Fetch budgets when a project is selected
+        } else {
+            setBudgets([]);
+            setExpenses([]);
+        }
+    }, [selectedItems]);
 
     const fetchData = () => {
         fetch("/api/project")
@@ -42,8 +56,35 @@ export default function HomePage() {
                 }
                 return response.json();
             })
-            .then((data: APIProjectResponse) => {
-                setData(data.projects);
+            .then(async (data: APIProjectResponse) => {
+                const projects = data.projects;
+
+                const projectsWithTotals = await Promise.all(
+                    projects.map(async (project) => {
+                        const budgetResponse = await fetch(`/api/budget/project/${project.id}`);
+                        const budgetData = await budgetResponse.json();
+                        const budgets: Budget[] = budgetData.budgets || [];
+
+                        const budgetTotal = budgets.reduce((sum: number, b: Budget) => sum + b.totalamount, 0);
+
+                        const budgetIds = budgets.map((b: Budget) => b.id);
+                        let expenseTotal = 0;
+
+                        if (budgetIds.length > 0) {
+                            const expenseResponse = await fetch(`/api/expense/budgets?ids=${budgetIds.join(",")}`);
+                            const expenseData = await expenseResponse.json();
+                            expenseTotal = expenseData.expenses.reduce((sum: number, e: Expense) => sum + e.amount, 0);
+                        }
+
+                        return {
+                            ...project,
+                            budgetTotal,
+                            expenseTotal,
+                        };
+                    })
+                );
+
+                setData(projectsWithTotals);
                 setSelectedItems(new Set());
             })
             .catch((error) => {
@@ -160,6 +201,7 @@ export default function HomePage() {
                     setCurrentPage={setCurrentPage}
                     expenses={expenses}
                     categories={categories}
+                    budgets={budgets}
                 />
             )}
             {activeTab === "reports" && (

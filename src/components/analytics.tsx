@@ -1,9 +1,8 @@
 "use client";
 
 import TableOverview from "@/components/tableoverview";
-import { Category, Expense, Project } from "@/types/interfaces/interface";
+import { Category, Expense, Project, Budget } from "@/types/interfaces/interface";
 import { useState } from "react";
-import { BarChartComponent } from "@/components/graphs/barchart";
 import {
     Select,
     SelectContent,
@@ -13,6 +12,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import DatePickerSection from "@/components/datepickersection";
+import { BarChartMultipleComponent } from "@/components/graphs/barchartmultiple";
 
 export default function Analytics({
                                       paginatedData,
@@ -24,6 +24,7 @@ export default function Analytics({
                                       setCurrentPage,
                                       expenses,
                                       categories,
+                                      budgets = [],
                                   }: {
     paginatedData: Project[];
     headers: { field: string; label: string; type: string }[];
@@ -34,14 +35,24 @@ export default function Analytics({
     setCurrentPage: (page: number) => void;
     expenses: Expense[];
     categories: Category[];
+    budgets: Budget[];
 }) {
     const selectedProjectId = Array.from(selectedItems)[0] || null;
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [startDate, setStartDate] = useState<string | null>(null);
     const [endDate, setEndDate] = useState<string | null>(null);
 
+    // Filter budgets based on the project and the selected category
+    const projectBudgets = budgets.filter((budget) => {
+        const belongsToProject = budget.projectid === selectedProjectId;
+        const matchesCategory = selectedCategory ? budget.categoryid === selectedCategory : true; // Add category filter
+        return belongsToProject && matchesCategory;
+    });
+
+    const totalBudget = projectBudgets.reduce((sum, budget) => sum + budget.totalamount, 0);
+
     const filteredExpenses = expenses.filter((expense) => {
-        const belongsToProject = selectedProjectId ? expense.budgetid === selectedProjectId : false;
+        const belongsToProject = projectBudgets.some((budget) => budget.id === expense.budgetid);
         const matchesCategory = selectedCategory ? expense.categoryid === selectedCategory : true;
         const withinDateRange =
             (!startDate || new Date(expense.date) >= new Date(startDate)) &&
@@ -49,17 +60,37 @@ export default function Analytics({
         return belongsToProject && matchesCategory && withinDateRange;
     });
 
-    const chartData = filteredExpenses.reduce<{ [month: string]: number }>((acc, expense) => {
-        const date = new Date(expense.date);
-        const month = date.toLocaleString("default", { month: "long" });
-        acc[month] = (acc[month] || 0) + expense.amount;
-        return acc;
-    }, {});
+    const allMonths = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
 
-    const formattedChartData = Object.entries(chartData).map(([month, amount]) => ({
-        month,
-        amount,
-    }));
+    let cumulativeExpenses = 0;
+    const chartData = allMonths.map((month, index) => {
+        const monthlyExpenses = filteredExpenses
+            .filter((expense) => new Date(expense.date).getMonth() === index)
+            .reduce((sum, expense) => sum + expense.amount, 0);
+
+        cumulativeExpenses += monthlyExpenses;
+        const availableBudget = totalBudget - cumulativeExpenses;
+
+        return {
+            month,
+            budget: availableBudget < 0 ? 0 : availableBudget,
+            expenses: monthlyExpenses,
+        };
+    });
+
+    const chartConfig = {
+        budget: {
+            label: "Available Budget",
+            color: "hsl(var(--chart-1))",
+        },
+        expenses: {
+            label: "Expenses",
+            color: "hsl(var(--chart-2))",
+        },
+    };
 
     return (
         <div className="flex mt-6">
@@ -81,7 +112,7 @@ export default function Analytics({
                         onValueChange={(value) => setSelectedCategory(value === "all" ? null : parseInt(value))}
                     >
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="All Categories"/>
+                            <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
@@ -103,7 +134,7 @@ export default function Analytics({
                     setEndDate={(date) => setEndDate(date ? date.toISOString().split("T")[0] : null)}
                 />
 
-                <BarChartComponent chartData={formattedChartData}/>
+                <BarChartMultipleComponent chartData={chartData} chartConfig={chartConfig} />
             </div>
         </div>
     );

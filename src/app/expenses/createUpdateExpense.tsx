@@ -13,14 +13,17 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 const FormSchema = z.object({
-    amount: z.number().positive("Amount must be a positive number"),
+    amount: z.coerce.number().positive("Amount must be a positive number"),
     description: z.string().nonempty("Description is required"),
-    date: z.date().optional(),
+    date: z.date(),
+    projectid: z.number().positive("Project ID must be selected"),
     budgetid: z.number().positive("Budget ID must be a positive number"),
     categoryid: z.number().positive("Category ID must be a positive number"),
 });
@@ -30,8 +33,12 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
     handleCreateOrUpdate: (value: boolean) => void;
     refreshData: () => void;
 }) {
-    const [budgets, setBudgets] = useState<{ id: number; name: string }[]>([]);
+    const [projects, setProjects] = useState<{ id: number; name: string }[]>([]);
+    const [budgets, setBudgets] = useState<{ id: number; name: string; projectid: number }[]>([]);
+    const [filteredBudgets, setFilteredBudgets] = useState<{ id: number; name: string }[]>([]);
     const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
 
@@ -41,12 +48,24 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
             amount: 0,
             description: "",
             date: new Date(),
+            projectid: 0,
             budgetid: 0,
             categoryid: 0,
         },
     });
 
     useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const response = await fetch("/api/project");
+                if (!response.ok) throw new Error("Failed to fetch projects");
+                const data = await response.json();
+                setProjects(data.projects || []);
+            } catch (error) {
+                console.error("Error fetching projects:", error);
+            }
+        };
+
         const fetchBudgets = async () => {
             try {
                 const response = await fetch("/api/budget");
@@ -69,15 +88,24 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
             }
         };
 
+        fetchProjects();
         fetchBudgets();
         fetchCategories();
     }, []);
 
     useEffect(() => {
+        if (selectedProjectId) {
+            const projectBudgets = budgets.filter((budget) => budget.projectid === selectedProjectId);
+            setFilteredBudgets(projectBudgets);
+        } else {
+            setFilteredBudgets([]);
+        }
+    }, [selectedProjectId, budgets]);
+
+    useEffect(() => {
         if (isUpdate && selectedId) {
             const fetchExpense = async () => {
                 try {
-                    console.log(`Fetching expense for ID: ${selectedId}`);
                     const res = await fetch(`/api/expense/${selectedId}`);
                     if (!res.ok) {
                         throw new Error(`Failed to fetch expense: ${res.statusText}`);
@@ -89,9 +117,11 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             amount: data.expense.amount,
                             description: data.expense.description,
                             date: new Date(data.expense.date),
+                            projectid: data.expense.projectid,
                             budgetid: data.expense.budgetid,
                             categoryid: data.expense.categoryid,
                         });
+                        setSelectedProjectId(data.expense.projectid);
                     } else {
                         console.error("Expense not found");
                     }
@@ -172,11 +202,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             <FormItem>
                                 <FormLabel>Description</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="text"
-                                        placeholder="Enter description"
-                                        {...field}
-                                    />
+                                    <Input type="text" placeholder="Enter description" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -189,14 +215,51 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                             <FormItem>
                                 <FormLabel>Date</FormLabel>
                                 <FormControl>
-                                    <div className="flex justify-start">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value || new Date()}
-                                            onSelect={(selectedDate) => field.onChange(selectedDate)}
-                                            className="rounded-md border shadow"
-                                        />
-                                    </div>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full text-left">
+                                                {field.value ? format(field.value, "yyyy-MM-dd") : "Select Date"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value || new Date()}
+                                                onSelect={(selectedDate) => field.onChange(selectedDate)}
+                                                className="rounded-md border shadow"
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="projectid"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Project</FormLabel>
+                                <FormControl>
+                                    <select
+                                        value={field.value || ""}
+                                        onChange={(e) => {
+                                            const projectId = parseInt(e.target.value, 10);
+                                            field.onChange(projectId);
+                                            setSelectedProjectId(projectId);
+                                        }}
+                                        className="w-full border border-gray-300 rounded-md p-2"
+                                    >
+                                        <option value="" disabled>
+                                            Select a project
+                                        </option>
+                                        {projects.map((project) => (
+                                            <option key={project.id} value={project.id}>
+                                                {project.name}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -217,7 +280,7 @@ export default function CreateUpdateExpense({ selectedItems, handleCreateOrUpdat
                                         <option value="" disabled>
                                             Select a budget
                                         </option>
-                                        {budgets.map((budget) => (
+                                        {filteredBudgets.map((budget) => (
                                             <option key={budget.id} value={budget.id}>
                                                 {budget.name}
                                             </option>
