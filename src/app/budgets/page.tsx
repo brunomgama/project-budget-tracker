@@ -6,7 +6,7 @@
  * - Components like `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI elements.
  */
 import { useEffect, useState } from "react";
-import { APIBudgetResponse, Budget } from "@/types/interfaces/interface";
+import {APIBudgetResponse, Budget, DisplayBudget} from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
@@ -199,7 +199,7 @@ export default function Projects() {
             </div>
 
             <div className="flex-grow overflow-auto">
-                <InfoTable
+                <InfoTable<DisplayBudget>
                     data={paginatedData}
                     headers={headers}
                     onSort={handleSort}

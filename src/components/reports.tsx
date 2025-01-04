@@ -44,7 +44,6 @@ export default function Reports({
 }) {
     // Get the selected project and its details
     const selectedProjectId = Array.from(selectedItems)[0];
-    const selectedProject = paginatedData.find((project) => project.id === selectedProjectId);
 
     // State for filtered budgets and expenses
     const [filteredBudgets, setFilteredBudgets] = useState<Budget[]>([]);

@@ -7,17 +7,23 @@
  * - `useState` and `useEffect` for managing state and side effects.
  */
 import TabSelection from "@/components/tabSelection";
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import {
     APIProjectResponse,
     Project,
     Budget,
     Expense,
-    Category,
+    Category, APIBudgetResponse, APIExpenseResponse,
 } from "@/types/interfaces/interface";
 import Overview from "@/components/overview";
 import Analytics from "@/components/analytics";
 import Reports from "@/components/reports";
+import {Dialog, DialogContent, DialogTrigger} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {TbCurrencyDollar, TbLayoutDashboard, TbReportMoney} from "react-icons/tb";
+import CreateUpdateProject from "@/app/projects/createUpdateProject";
+import CreateUpdateBudget from "@/app/budgets/createUpdateBudget";
+import CreateUpdateExpense from "@/app/expenses/createUpdateExpense";
 
 /**
  * Define headers for project data table.
@@ -43,10 +49,18 @@ export default function HomePage() {
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [activeTab, setActiveTab] = useState("overview");
 
+    const [budgetAllData, setBudgetAllData] = useState<APIBudgetResponse | null>(null);
+    const [expenseAllData, setExpenseAllData] = useState<APIExpenseResponse | null>(null);
+
     const itemsPerPage = 10;
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+
+    // Dialog state to handle open/close for project, budget, and expense forms
+    const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+    const [isBudgetDialogOpen, setIsBudgetDialogOpen] = useState(false);
+    const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
 
     /**
      * Fetch initial data (projects and categories) when the component mounts.
@@ -54,6 +68,52 @@ export default function HomePage() {
     useEffect(() => {
         fetchData();
         fetchCategories();
+        refreshData();
+    }, []);
+
+    const refreshData = () => {
+        fetch("/api/budget")
+            .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch budgets");
+                return response.json();
+            })
+            .then((data) => setBudgetAllData(data))
+            .catch((error) => console.error("Error fetching budgets:", error));
+
+        fetch("/api/expense")
+            .then((response) => {
+                if (!response.ok) throw new Error("Failed to fetch expenses");
+                return response.json();
+            })
+            .then((data) => setExpenseAllData(data))
+            .catch((error) => console.error("Error fetching expenses:", error));
+    };
+
+
+    /**
+     * Fetch budgets for the selected project.
+     */
+    const fetchBudgets = useCallback(async (projectId: number) => {
+        try {
+            const response = await fetch(`/api/budget/project/${projectId}`);
+            const result = await response.json();
+            if (response.ok) {
+                setBudgets(result.budgets);
+                const budgetIds = result.budgets.map((b: Budget) => b.id);
+                if (budgetIds.length > 0) {
+                    fetchExpenses(budgetIds);
+                } else {
+                    setExpenses([]);
+                }
+            } else {
+                setBudgets([]);
+                setExpenses([]);
+            }
+        } catch (error) {
+            console.error("Error fetching budgets:", error);
+            setBudgets([]);
+            setExpenses([]);
+        }
     }, []);
 
     /**
@@ -67,7 +127,7 @@ export default function HomePage() {
             setBudgets([]);
             setExpenses([]);
         }
-    }, [selectedItems]);
+    }, [selectedItems, fetchBudgets]);
 
     /**
      * Fetch project data from the API.
@@ -118,32 +178,6 @@ export default function HomePage() {
     };
 
     /**
-     * Fetch budgets for the selected project.
-     */
-    const fetchBudgets = async (projectId: number) => {
-        try {
-            const response = await fetch(`/api/budget/project/${projectId}`);
-            const result = await response.json();
-            if (response.ok) {
-                setBudgets(result.budgets);
-                const budgetIds = result.budgets.map((b: Budget) => b.id);
-                if (budgetIds.length > 0) {
-                    fetchExpenses(budgetIds);
-                } else {
-                    setExpenses([]);
-                }
-            } else {
-                setBudgets([]);
-                setExpenses([]);
-            }
-        } catch (error) {
-            console.error("Error fetching budgets:", error);
-            setBudgets([]);
-            setExpenses([]);
-        }
-    };
-
-    /**
      * Fetch expenses for the provided budget IDs.
      */
     const fetchExpenses = async (budgetIds: number[]) => {
@@ -184,6 +218,7 @@ export default function HomePage() {
         console.log("Refreshing Overview Data...");
         await fetchData();
         await fetchCategories();
+        await refreshData();
     };
 
     /**
@@ -228,8 +263,58 @@ export default function HomePage() {
             <TabSelection
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
-                refreshOverviewData={refreshOverviewData}
+                projectData={data}
+                budgetData={budgetAllData?.budgets || []}
+                expenseData={expenseAllData?.expenses || []}
             />
+
+            <div className="flex gap-2 mt-4">
+                <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                            <TbLayoutDashboard/> Add Project
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <CreateUpdateProject
+                            selectedItems={new Set()}
+                            handleCreateOrUpdate={setIsProjectDialogOpen}
+                            refreshData={refreshOverviewData}
+                        />
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                            <TbCurrencyDollar/> Add Budget
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <CreateUpdateBudget
+                            selectedItems={new Set()}
+                            handleCreateOrUpdate={setIsBudgetDialogOpen}
+                            refreshData={refreshOverviewData}
+                        />
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                            <TbReportMoney/> Add Expense
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <CreateUpdateExpense
+                            selectedItems={new Set()}
+                            handleCreateOrUpdate={setIsExpenseDialogOpen}
+                            refreshData={refreshOverviewData}
+                        />
+                    </DialogContent>
+                </Dialog>
+            </div>
+
             {activeTab === "overview" && (
                 <Overview
                     paginatedData={paginatedData}

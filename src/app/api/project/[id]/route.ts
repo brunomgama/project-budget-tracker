@@ -4,9 +4,9 @@ import db from '../../../../db/database';
 import {Project} from "@/types/interfaces/interface";
 
 // GET request to fetch project details by ID.
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const id = (await params).id
 
         if (!id || isNaN(Number(id))) {
             return NextResponse.json({ error: "Invalid or missing ID" }, { status: 400 });
@@ -36,9 +36,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // PUT request to update a project's details by ID.
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const id = params.id;
+        const id = (await params).id
         const body = await req.json();
         const { name } = body;
 

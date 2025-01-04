@@ -6,7 +6,7 @@
  * - `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI elements.
  */
 import { useEffect, useState } from "react";
-import { APIExpenseResponse, Expense } from "@/types/interfaces/interface";
+import {APIExpenseResponse, DisplayExpense, Expense} from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
@@ -202,7 +202,7 @@ export default function Expenses() {
             </div>
 
             <div className="flex-grow overflow-auto">
-                <InfoTable
+                <InfoTable<DisplayExpense>
                     data={paginatedData.map((expense) => ({
                         ...expense,
                         budgetid: budgetMap[expense.budgetid] || "Unknown Budget",

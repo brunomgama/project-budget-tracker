@@ -16,12 +16,16 @@ interface Header {
     type: string;
 }
 
-export default function InfoTable(
+interface Identifiable {
+    id: number;
+}
+
+export default function InfoTable<T extends Identifiable>(
     { data, headers, onSort, selectedItems, onSelectItem }:
         {
-            data: Record<string, any>[];
+            data: T[];
             headers: Header[];
-            onSort?: (key: string) => void;
+            onSort?: (key: keyof T) => void;
             selectedItems: Set<number>;
             onSelectItem: (id: number) => void;
         }
@@ -35,16 +39,14 @@ export default function InfoTable(
             {/* Table header with sortable column headings */}
             <TableHeader>
                 <TableRow>
-                    <TableHead>
-                        {/* Empty header cell for checkbox column */}
-                    </TableHead>
+                    <TableHead>{/* Empty header for checkboxes */}</TableHead>
                     {headers.map((header) => (
                         <TableHead
                             key={header.field}
                             className={`cursor-pointer ${onSort ? "hover:text-blue-600" : ""}`}
                             onClick={() => {
                                 if (onSort) {
-                                    onSort(header.field);
+                                    onSort(header.field as keyof T);
                                 }
                             }}
                         >
@@ -58,8 +60,8 @@ export default function InfoTable(
             {/* Table body containing rows of data */}
             <TableBody>
                 {data.length > 0 ? (
-                    data.map((row, index) => (
-                        <TableRow key={index} className="cursor-pointer" onClick={() => onSelectItem(row.id)}>
+                    data.map((row) => (
+                        <TableRow key={row.id} className="cursor-pointer" onClick={() => onSelectItem(row.id)}>
                             <TableCell onClick={(e) => e.stopPropagation()}>
                                 {/* Checkbox for selecting a row */}
                                 <input
@@ -72,8 +74,8 @@ export default function InfoTable(
                                 <TableCell key={header.field}>
                                     {/* Render currency or default value based on header type */}
                                     {header.type === "money"
-                                        ? `${parseFloat(row[header.field] || 0).toFixed(2)} €`
-                                        : row[header.field] ?? "N/A"}
+                                        ? `${parseFloat((row[header.field as keyof T] as number | string)?.toString() || "0").toFixed(2)} €`
+                                        : row[header.field as keyof T]?.toString() || "N/A"}
                                 </TableCell>
                             ))}
                         </TableRow>

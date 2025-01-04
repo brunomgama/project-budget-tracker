@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import sqlite3 from 'sqlite3';
 import db from '../../../../db/database';
 import {Budget} from "@/types/interfaces/interface";
 
 // GET request to fetch budget details by ID.
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const id = (await params).id
 
         if (!id) {
             return NextResponse.json({ error: "No ID provided" }, { status: 400 });
@@ -36,9 +36,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // PUT request to update a budget by ID.
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = params;
+        const id = (await params).id
         const body = await req.json();
         const { name, totalamount, projectid, categoryid } = body;
 

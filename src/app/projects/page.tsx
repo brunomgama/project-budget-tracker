@@ -142,7 +142,7 @@ export default function Projects() {
             </div>
 
             <div className="flex-grow overflow-auto">
-                <InfoTable
+                <InfoTable<Project>
                     data={paginatedData}
                     headers={headers}
                     onSort={handleSort}

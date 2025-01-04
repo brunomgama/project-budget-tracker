@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * Import necessary components and hooks.
- * - Dialog components for the header, title, and description.
- * - Button for form actions.
- * - Zod for schema validation.
- * - useForm from React Hook Form for form control.
- */
 import { DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
@@ -114,7 +107,7 @@ export default function CreateUpdateBudget({
 
         fetchProjects();
         fetchCategories();
-    }, []);
+    }, [form]);
 
     /**
      * If updating an existing budget, fetch the budget details.

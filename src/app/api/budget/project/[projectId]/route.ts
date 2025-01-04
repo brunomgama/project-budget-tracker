@@ -3,9 +3,9 @@ import db from '../../../../../db/database';
 import {Budget} from "@/types/interfaces/interface";
 
 // GET request to fetch all budgets associated with a specific project ID.
-export async function GET(req: Request, { params }: { params: { projectId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
-        const { projectId } = params;
+        const projectId = (await params).projectId
 
         if (!projectId) {
             return NextResponse.json({ error: "No Project ID provided" }, { status: 400 });

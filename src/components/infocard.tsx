@@ -10,6 +10,7 @@
  */
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import {ReactNode} from "react";
 
 export default function InfoCard({
                                      title,
@@ -19,7 +20,7 @@ export default function InfoCard({
                                  }: {
     title: string;
     value: string;
-    icon: any;
+    icon?: ReactNode;
     href: string;
 }) {
     const router = useRouter();

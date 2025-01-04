@@ -23,6 +23,14 @@ export interface APIBudgetResponse {
     budgets: Budget[];
 }
 
+export interface DisplayBudget {
+    id: number;
+    name: string;
+    totalamount: number;
+    projectid: string;  // Display-friendly string instead of number
+    categoryid: string;  // Display-friendly string instead of number
+}
+
 // Interface representing an expense entity, detailing the amount, description, date, and related budget and category IDs.
 export interface Expense {
     id: number;
@@ -37,6 +45,16 @@ export interface Expense {
 export interface APIExpenseResponse {
     expenses: Expense[];
 }
+
+export interface DisplayExpense {
+    id: number;
+    amount: number;
+    description: string;
+    date: string;
+    budgetid: string;  // Display-friendly string instead of number
+    categoryid: string;  // Display-friendly string instead of number
+}
+
 
 // Interface representing a project manager entity with an ID and name.
 export interface Manager {

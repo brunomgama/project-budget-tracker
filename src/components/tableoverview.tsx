@@ -15,6 +15,7 @@
 
 import InfoTable from "@/components/infotable";
 import Pagination from "@/components/pagination";
+import {Project} from "@/types/interfaces/interface";
 
 export default function TableOverview({
                                           data,
@@ -25,7 +26,7 @@ export default function TableOverview({
                                           handleSelectItem,
                                           setCurrentPage,
                                       }: {
-    data: any[];
+    data: Project[];
     headers: { field: string; label: string; type: string }[];
     currentPage: number;
     totalPages: number;
@@ -46,7 +47,7 @@ export default function TableOverview({
     return (
         <div className="flex flex-col h-full">
             <div className="flex-grow overflow-auto">
-                <InfoTable
+                <InfoTable<Project>
                     data={data}
                     headers={headers}
                     selectedItems={selectedItems}

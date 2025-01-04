@@ -142,7 +142,7 @@ export default function Categories() {
             </div>
 
             <div className="flex-grow overflow-auto">
-                <InfoTable
+                <InfoTable<Category>
                     data={paginatedData}
                     headers={headers}
                     onSort={handleSort}
