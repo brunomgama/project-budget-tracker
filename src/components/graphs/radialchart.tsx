@@ -9,14 +9,6 @@ import {
     RadialBarChart,
 } from "recharts";
 
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 type ChartData = {
@@ -44,12 +36,12 @@ interface ComponentProps {
 
 export function RadialChartComponent({ chartData, title = "Budget Overview", description = "Project Budget Allocation" }: ComponentProps) {
     return (
-        <Card className="flex flex-col">
-            <CardHeader className="items-center pb-0">
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 pb-0">
+        <div className="flex flex-col items-center">
+            <div className="text-center">
+                <h2 className="text-lg font-bold">{title}</h2>
+                <p className="text-sm text-gray-600">{description}</p>
+            </div>
+            <div className="flex justify-center">
                 <ChartContainer
                     config={chartConfig}
                     className="mx-auto aspect-square max-h-80 min-h-80"
@@ -58,14 +50,13 @@ export function RadialChartComponent({ chartData, title = "Budget Overview", des
                         data={chartData}
                         startAngle={90}
                         endAngle={90 + (360 * chartData[0].percentage) / 100}
-                        innerRadius={80}
-                        outerRadius={110}
+                        innerRadius={70}
+                        outerRadius={100}
                     >
                         <PolarGrid
                             gridType="circle"
                             radialLines={false}
                             stroke="none"
-                            polarRadius={[86, 74]}
                         />
                         <RadialBar
                             dataKey="percentage"
@@ -105,15 +96,12 @@ export function RadialChartComponent({ chartData, title = "Budget Overview", des
                         </PolarRadiusAxis>
                     </RadialBarChart>
                 </ChartContainer>
-            </CardContent>
-            <CardFooter className="flex-col gap-2 text-sm">
-                <div className="flex items-center gap-2 font-medium leading-none">
-                    <p>
-                        {`You have available ${chartData[0].percentage}% of your budget`}
-                    </p>
-                    <TrendingUp className="h-4 w-4" />
-                </div>
-            </CardFooter>
-        </Card>
+            </div>
+            <div className="text-center mt-2">
+                <p className="text-sm font-medium">
+                    You have available {chartData[0].percentage}% of your budget
+                </p>
+            </div>
+        </div>
     );
 }

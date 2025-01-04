@@ -62,11 +62,11 @@ export default function TabSelection({ activeTab, setActiveTab }: { activeTab: s
     return (
         <div className={"mt-6"}>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList style={{ backgroundColor: "var(--color-lighter)" }}>
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                    <TabsTrigger value="reports">Reports</TabsTrigger>
-                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsList className="bg-indigo-100 rounded-lg">
+                    <TabsTrigger value="overview" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Overview</TabsTrigger>
+                    <TabsTrigger value="analytics" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Analytics</TabsTrigger>
+                    <TabsTrigger value="reports" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Reports</TabsTrigger>
+                    <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">Notifications</TabsTrigger>
                 </TabsList>
 
                 { activeTab === "overview" && (

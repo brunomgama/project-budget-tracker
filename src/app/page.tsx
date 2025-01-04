@@ -124,10 +124,8 @@ export default function HomePage() {
     ];
 
     return (
-        <div className="container mx-auto px-4">
-
+        <div className="container mx-auto">
             <TabSelection activeTab={activeTab} setActiveTab={setActiveTab} />
-
             {activeTab === "overview" && (
                 <Overview
                     paginatedData={paginatedData}
