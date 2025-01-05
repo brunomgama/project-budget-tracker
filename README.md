@@ -1,10 +1,10 @@
 # Project Budget Tracker
 
-## Overview
+## 🌐 Overview
 
 The **Project Budget Tracker** is a web application designed to help project managers manage project budgets and expenses. The app includes features for tracking budgets, managing expenses, creating reports, and visualizing data across various categories and date ranges.
 
-## Handling Initial Loading Issue
+## ⏳ Handling Initial Loading Issue
 In some cases, when the server starts for the first time, you may encounter a SyntaxError: Invalid or unexpected token in layout.js. This issue is related to how Next.js initializes and transpiles TypeScript/JavaScript components during the first load. This is not a bug in the codebase itself but rather a quirk of the Next.js server when running in development mode.
 
 #### *Why Does This Happen?*
@@ -19,7 +19,7 @@ This issue is caused by the server initialization process in Next.js and not due
 
 ---
 
-## **Table of Contents**
+## **📚 Table of Contents**
 
 0. [Run project locally](#run-locally)
 1. [Database Choice](#database-choice)
@@ -30,11 +30,11 @@ This issue is caused by the server initialization process in Next.js and not due
 6. [Starting the Database](#starting-the-database)
 7. [Starting the Server](#starting-the-server)
 8. [Shadcn UI Overview](#shadcn-ui-overview)
-9. [TextExtract Overview] (#text-extract-overview)
+9. [TextExtract Overview](#text-extract-overview)
 
 ---
 
-## **Run Locally**
+## 💻 **Run Locally**
 
 #### *Option 1*: Execute initializer.sh script
 1. Open a terminal in the project directory.
@@ -68,12 +68,12 @@ npm run dev
 6. Open your browser and navigate to http://localhost:3000.
 7. If you encounter a loading issue, refer to the [Handling Initial Loading Issue](#handling-initial-loading-issue) section.
 
-# Clean Database
+# 🧨 Clean Database
 Upon running the initializer.sh script, the database is seeded with sample data. If you wish to start with a clean database, you can delete the file that has been automatically created on /src/db/budget_tracker.db
 
 ---
 
-## **Database Choice**
+## 🗄️ **Database Choice**
 
 ### **SQLite (File-based)**
 
@@ -126,7 +126,7 @@ I've chosen SQLite because it offers simplicity and suits our needs for a lightw
 
 ---
 
-## **Tech Stack**
+## 🛠️ **Tech Stack**
 
 ### **Frontend:**
 - **Framework:** Next.js (v15.1.3), React (v19.0.0)
@@ -146,7 +146,7 @@ I've chosen SQLite because it offers simplicity and suits our needs for a lightw
 
 ---
 
-## **Libraries Used**
+## 📦 **Libraries Used**
 
 | Library             | Purpose                                          | Installation Command                  |
 |---------------------|--------------------------------------------------|----------------------------------------|
@@ -180,7 +180,7 @@ src/
 └── types/interfaces/       # TypeScript interfaces and type definitions
 ```
 
-## **Database Objects**
+## 🗃️ **Database Objects**
 
 ### **Project**
 - `id`: Unique identifier.
@@ -212,7 +212,7 @@ src/
 
 ---
 
-## **Starting the Database**
+## 🚀 **Starting the Database**
 
 1. Open a terminal in project directory
 2. Run the following command to apply the migrations and create the database schema:
@@ -231,7 +231,7 @@ npm run dev
 ```
 Open your browser and navigate to http://localhost:3000.
 
-## **Shadcn UI Overview**
+## 🖌️ **Shadcn UI Overview**
 
 The **Shadcn UI** is a set of highly customizable UI components built using Radix Primitives, providing accessible and composable UI elements for modern web applications.
 

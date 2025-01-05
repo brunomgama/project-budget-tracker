@@ -6,7 +6,7 @@
  * - `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI elements.
  */
 import { useEffect, useState } from "react";
-import { APICategoryResponse, Category } from "@/types/interfaces/interface";
+import {APICategoryResponse, Category, Expense, Project} from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
@@ -77,9 +77,33 @@ export default function Categories() {
      */
     const handleSearch = (query: string) => {
         setSearchQuery(query);
-        const filtered = data.filter((category) =>
-            category.name.toLowerCase().includes(query.toLowerCase())
+
+        const lowerCaseQuery = query.toLowerCase();
+        const isNumericQuery = !isNaN(Number(query));
+
+        const filtered = data.filter((item) =>
+            headers.some((header) => {
+                const fieldValue = item[header.field as keyof Category];
+
+                if (fieldValue === null || fieldValue === undefined) return false;
+
+                if (header.type === "number" || header.type === "money") {
+                    return isNumericQuery && fieldValue.toString().includes(query);
+                }
+
+                if (header.type === "string" || header.type === "description") {
+                    return fieldValue.toString().toLowerCase().includes(lowerCaseQuery);
+                }
+
+                if (header.type === "date") {
+                    const formattedDate = new Date(fieldValue).toLocaleDateString();
+                    return formattedDate.includes(query);
+                }
+
+                return false;
+            })
         );
+
         setFilteredData(filtered);
         setCurrentPage(1);
     };
@@ -88,10 +112,16 @@ export default function Categories() {
      * Handle sorting the category list by name.
      * - Toggles between ascending and descending order.
      */
-    const handleSort = () => {
+    const handleSort = (key: keyof Category) => {
         const sortedData = [...filteredData].sort((a, b) => {
-            const comparison = a.name.localeCompare(b.name);
-            return sortOrder === "asc" ? comparison : -comparison;
+            // Sort numbers and strings differently
+            if (typeof a[key] === "number" && typeof b[key] === "number") {
+                return sortOrder === "asc" ? a[key] - b[key] : b[key] - a[key];
+            } else {
+                return sortOrder === "asc"
+                    ? a[key]?.toString().localeCompare(b[key]?.toString())
+                    : b[key]?.toString().localeCompare(a[key]?.toString());
+            }
         });
         setFilteredData(sortedData);
         setSortOrder(sortOrder === "asc" ? "desc" : "asc");

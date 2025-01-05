@@ -19,15 +19,15 @@ export default function Upload() {
     const [pdfFile, setPdfFile] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedIndex = e.target.selectedIndex - 1; // Account for the default "Select a document..." option
+        const selectedIndex = e.target.selectedIndex - 1;
         if (selectedIndex >= 0) {
             const newFile = files[selectedIndex];
             setSelectedFile(newFile);
             setPdfFile(newFile.pdfPath);
         } else {
-            setSelectedFile(null); // No file selected
-            setPdfFile(null); // Hide PDF preview
-            setCsvData([]); // Clear the table
+            setSelectedFile(null);
+            setPdfFile(null);
+            setCsvData([]);
         }
     };
 
@@ -104,7 +104,6 @@ export default function Upload() {
             <h1 className="text-2xl font-bold mb-4">Upload and View File</h1>
 
             <div className="flex gap-6">
-                {/* Left: PDF Viewer */}
                 <div className="w-1/2 p-4 border border-gray-300 rounded bg-gray-50">
                     <h2 className="text-lg font-semibold mb-2">Document Preview</h2>
                     {pdfFile ? (
@@ -114,7 +113,6 @@ export default function Upload() {
                     )}
                 </div>
 
-                {/* Right: Tabs for Query/Table/Layout */}
                 <div className="w-1/2">
                     <select
                         className="border p-2 rounded mb-4 w-full"
