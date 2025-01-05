@@ -15,7 +15,7 @@ const files = [
 export default function Upload() {
     const [selectedFile, setSelectedFile] = useState<typeof files[0] | null>(null);
     const [selectedTab, setSelectedTab] = useState<"table" | "query" | "layout">("query");
-    const [csvData, setCsvData] = useState<any[]>([]);
+    const [csvData, setCsvData] = useState<{ [key: string]: string }[]>([]);
     const [pdfFile, setPdfFile] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -74,7 +74,7 @@ export default function Upload() {
         fetchCSVData(csvPath).then((data) => setCsvData(data));
     }, [selectedTab, selectedFile]);
 
-    const renderTable = (data: any[]) => (
+    const renderTable = (data: { [key: string]: string }[]) => (
         <table className="w-full border-collapse border border-gray-300 mt-4">
             <thead>
             <tr className="bg-gray-200">

@@ -6,7 +6,7 @@
  * - `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI elements.
  */
 import { useEffect, useState } from "react";
-import {APIExpenseResponse, DisplayExpense, Expense, Project} from "@/types/interfaces/interface";
+import {APIExpenseResponse, DisplayExpense, Expense} from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
 import Pagination from "@/components/pagination";
