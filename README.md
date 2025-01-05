@@ -148,15 +148,43 @@ I've chosen SQLite because it offers simplicity and suits our needs for a lightw
 
 ## 📦 **Libraries Used**
 
-| Library             | Purpose                                          | Installation Command                  |
-|---------------------|--------------------------------------------------|----------------------------------------|
-| `sqlite3`           | SQLite client for Node.js                        | `npm install sqlite3`                  |
-| `knex`              | SQL query builder for Node.js                    | `npm install knex`                     |
-| `react-hook-form`   | Form handling for React                          | `npm install react-hook-form`          |
-| `zod`               | Schema validation                                | `npm install zod`                      |
-| `recharts`          | Data visualization library                       | `npm install recharts`                 |
-| `tailwindcss`       | Utility-first CSS framework                      | `npm install tailwindcss`              |
-| `radix-ui`          | UI primitives (dialog, popover, select, etc.)    | Included via individual Radix imports  |
+# Library Overview and Installation Commands
+
+| Library                    | Purpose                                                    | Installation Command                  |
+|----------------------------|------------------------------------------------------------|----------------------------------------|
+| **`@hookform/resolvers`**   | Provides validation resolvers for `react-hook-form` using libraries like Zod. | `npm install @hookform/resolvers`      |
+| **`@radix-ui/react-*`**     | Unstyled, accessible primitives for building UI components like modals, tabs, and switches. | `npm install @radix-ui/react-dialog @radix-ui/react-popover @radix-ui/react-select ...` |
+| **`class-variance-authority (CVA)`** | Utility for managing Tailwind classes and conditional styling. | `npm install class-variance-authority` |
+| **`clsx`**                  | Utility for combining class names conditionally in JSX.    | `npm install clsx`                     |
+| **`date-fns`**              | Lightweight library for date manipulation and formatting.  | `npm install date-fns`                 |
+| **`lucide-react`**          | Icon library for React with modern SVG icons.              | `npm install lucide-react`             |
+| **`next`**                  | React framework for server-side rendering, routing, and API routes. | `npm install next`                     |
+| **`react`** & **`react-dom`** | Core libraries for building React apps.                   | `npm install react react-dom`          |
+| **`react-colorful`**        | Lightweight color picker component for React.              | `npm install react-colorful`           |
+| **`react-day-picker`**      | Date picker component for single and multi-date selection. | `npm install react-day-picker`         |
+| **`react-hook-form`**       | Lightweight library for managing form state and validation. | `npm install react-hook-form`          |
+| **`react-icons`**           | Library of icons from multiple icon packs.                 | `npm install react-icons`              |
+| **`sqlite3`**               | SQL-based database for local storage of data.              | `npm install sqlite3`                  |
+| **`tailwind-merge`**        | Utility for merging Tailwind CSS classes dynamically.      | `npm install tailwind-merge`           |
+| **`tailwindcss-animate`**   | Adds animation utilities for Tailwind CSS.                 | `npm install tailwindcss-animate`      |
+| **`zod`**                   | Type-safe schema validation for forms and API requests.    | `npm install zod`                      |
+
+---
+
+## Notes on Usage and Justifications
+
+- **`sqlite3`**: Chosen for lightweight local data storage.
+- **`zod`** + **`@hookform/resolvers`** + **`react-hook-form`**: These libraries are used together to create and validate forms efficiently.
+- **`@radix-ui/react-*`**: Modular UI components for accessibility without extra styling.
+- **`tailwindcss-animate`** + **`tailwind-merge`** + **`class-variance-authority`**: These enhance Tailwind CSS's ability to apply dynamic and animated classes cleanly.
+- **`date-fns`** + **`react-day-picker`**: Date-related operations for filtering and date-picking in the app.
+- **`lucide-react`** + **`react-icons`** + **`react-colorful`**: Provide icons and a color picker for improving the UI's interactivity.
+
+---
+### Example Uninstallation Command:
+To remove unnecessary libraries:
+```bash
+npm uninstall knex recharts pg papaparse
 
 ---
 
@@ -185,6 +213,7 @@ src/
 ### **Project**
 - `id`: Unique identifier.
 - `name`: Name of the project.
+- `managerid`: Foreign key linking to the associated manager.
 
 ### **Manager**
 - `id`: Unique identifier.
