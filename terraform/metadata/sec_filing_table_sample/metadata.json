@@ -1,0 +1,13 @@
+{
+  "query": {
+    "PERIOD": {
+      "Text": "Which period is the report?"
+    },
+    "BUDGET_ALLOCATION": {
+      "Text": "What is the Budget Allocation for Client Onboarding System?"
+    },
+    "EXPENSES": {
+      "Text": "What is the Expenses for Cybersecurity Enhancement?"
+    }
+  }
+}
