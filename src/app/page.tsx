@@ -24,6 +24,7 @@ import {TbCurrencyDollar, TbLayoutDashboard, TbReportMoney} from "react-icons/tb
 import CreateUpdateProject from "@/app/projects/createUpdateProject";
 import CreateUpdateBudget from "@/app/budgets/createUpdateBudget";
 import CreateUpdateExpense from "@/app/expenses/createUpdateExpense";
+import Loading from "@/components/loading";
 
 /**
  * Define headers for project data table.
@@ -48,6 +49,7 @@ export default function HomePage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
     const [activeTab, setActiveTab] = useState("overview");
+    const [loading, setLoading] = useState(true);
 
     const [budgetAllData, setBudgetAllData] = useState<APIBudgetResponse | null>(null);
     const [expenseAllData, setExpenseAllData] = useState<APIExpenseResponse | null>(null);
@@ -66,9 +68,19 @@ export default function HomePage() {
      * Fetch initial data (projects and categories) when the component mounts.
      */
     useEffect(() => {
-        fetchData();
-        fetchCategories();
-        refreshData();
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                await fetchData();
+                await fetchCategories();
+                await refreshData();
+            } catch (error) {
+                console.error("Error loading data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadData();
     }, []);
 
     const refreshData = () => {
@@ -215,10 +227,11 @@ export default function HomePage() {
      * Refresh data when the "Refresh" button is clicked.
      */
     const refreshOverviewData = async () => {
-        console.log("Refreshing Overview Data...");
+        setLoading(true);
         await fetchData();
         await fetchCategories();
         await refreshData();
+        setLoading(false);
     };
 
     /**
@@ -260,101 +273,107 @@ export default function HomePage() {
      */
     return (
         <div className="container mx-auto">
-            <TabSelection
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                projectData={data}
-                budgetData={budgetAllData?.budgets || []}
-                expenseData={expenseAllData?.expenses || []}
-            />
+            {loading ? (
+                <Loading />
+            ) : (
+                <>
+                    <TabSelection
+                        activeTab={activeTab}
+                        setActiveTab={setActiveTab}
+                        projectData={data}
+                        budgetData={budgetAllData?.budgets || []}
+                        expenseData={expenseAllData?.expenses || []}
+                    />
 
-            <div className="flex gap-2 mt-4">
-                <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                            <TbLayoutDashboard/> Add Project
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <CreateUpdateProject
-                            selectedItems={new Set()}
-                            handleCreateOrUpdate={setIsProjectDialogOpen}
-                            refreshData={refreshOverviewData}
+                    <div className="flex gap-2 mt-4">
+                        <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                    <TbLayoutDashboard /> Add Project
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <CreateUpdateProject
+                                    selectedItems={new Set()}
+                                    handleCreateOrUpdate={setIsProjectDialogOpen}
+                                    refreshData={refreshOverviewData}
+                                />
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                    <TbCurrencyDollar /> Add Budget
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <CreateUpdateBudget
+                                    selectedItems={new Set()}
+                                    handleCreateOrUpdate={setIsBudgetDialogOpen}
+                                    refreshData={refreshOverviewData}
+                                />
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                    <TbReportMoney /> Add Expense
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <CreateUpdateExpense
+                                    selectedItems={new Set()}
+                                    handleCreateOrUpdate={setIsExpenseDialogOpen}
+                                    refreshData={refreshOverviewData}
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
+                    {activeTab === "overview" && (
+                        <Overview
+                            paginatedData={paginatedData}
+                            headers={headers}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            selectedItems={selectedItems}
+                            handleSelectItem={handleSelectItem}
+                            setCurrentPage={setCurrentPage}
+                            chartData={chartData}
+                            totalBudget={totalBudget}
                         />
-                    </DialogContent>
-                </Dialog>
-
-                <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                            <TbCurrencyDollar/> Add Budget
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <CreateUpdateBudget
-                            selectedItems={new Set()}
-                            handleCreateOrUpdate={setIsBudgetDialogOpen}
-                            refreshData={refreshOverviewData}
+                    )}
+                    {activeTab === "analytics" && (
+                        <Analytics
+                            paginatedData={paginatedData}
+                            headers={headers}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            selectedItems={selectedItems}
+                            handleSelectItem={handleSelectItem}
+                            setCurrentPage={setCurrentPage}
+                            expenses={expenses}
+                            categories={categories}
+                            budgets={budgets}
                         />
-                    </DialogContent>
-                </Dialog>
-
-                <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                            <TbReportMoney/> Add Expense
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <CreateUpdateExpense
-                            selectedItems={new Set()}
-                            handleCreateOrUpdate={setIsExpenseDialogOpen}
-                            refreshData={refreshOverviewData}
+                    )}
+                    {activeTab === "reports" && (
+                        <Reports
+                            paginatedData={paginatedData}
+                            headers={headers}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            selectedItems={selectedItems}
+                            handleSelectItem={handleSelectItem}
+                            setCurrentPage={setCurrentPage}
+                            expenses={expenses}
+                            categories={categories}
+                            budgets={budgets}
                         />
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            {activeTab === "overview" && (
-                <Overview
-                    paginatedData={paginatedData}
-                    headers={headers}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    selectedItems={selectedItems}
-                    handleSelectItem={handleSelectItem}
-                    setCurrentPage={setCurrentPage}
-                    chartData={chartData}
-                    totalBudget={totalBudget}
-                />
-            )}
-            {activeTab === "analytics" && (
-                <Analytics
-                    paginatedData={paginatedData}
-                    headers={headers}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    selectedItems={selectedItems}
-                    handleSelectItem={handleSelectItem}
-                    setCurrentPage={setCurrentPage}
-                    expenses={expenses}
-                    categories={categories}
-                    budgets={budgets}
-                />
-            )}
-            {activeTab === "reports" && (
-                <Reports
-                    paginatedData={paginatedData}
-                    headers={headers}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    selectedItems={selectedItems}
-                    handleSelectItem={handleSelectItem}
-                    setCurrentPage={setCurrentPage}
-                    expenses={expenses}
-                    categories={categories}
-                    budgets={budgets}
-                />
+                    )}
+                </>
             )}
         </div>
     );

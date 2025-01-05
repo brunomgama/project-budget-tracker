@@ -4,10 +4,24 @@
 
 The **Project Budget Tracker** is a web application designed to help project managers manage project budgets and expenses. The app includes features for tracking budgets, managing expenses, creating reports, and visualizing data across various categories and date ranges.
 
+## Handling Initial Loading Issue
+In some cases, when the server starts for the first time, you may encounter a SyntaxError: Invalid or unexpected token in layout.js. This issue is related to how Next.js initializes and transpiles TypeScript/JavaScript components during the first load. This is not a bug in the codebase itself but rather a quirk of the Next.js server when running in development mode.
+
+#### *Why Does This Happen?*
+When the Next.js server is restarted, the initial request to the application can sometimes time out during the first page load, especially when complex components such as dynamic imports and fonts (next/font/google) are used.
+After this initial load, the issue usually resolves itself and does not occur again during subsequent navigation or page reloads.
+
+#### *Recommended Steps to Mitigate:*
+Refresh the Page: If the loading takes more than 5 seconds or you encounter a "SyntaxError: Invalid or unexpected token", simply refresh the browser page (F5 or Ctrl+R).
+
+#### *Conclusion:*
+This issue is caused by the server initialization process in Next.js and not due to the implementation of the project code. If you encounter the issue during development, refreshing the page typically resolves it.
+
 ---
 
 ## **Table of Contents**
 
+0. [Run project locally](#run-locally)
 1. [Database Choice](#database-choice)
 2. [Tech Stack](#tech-stack)
 3. [Libraries Used](#libraries-used)
@@ -16,6 +30,42 @@ The **Project Budget Tracker** is a web application designed to help project man
 6. [Starting the Database](#starting-the-database)
 7. [Starting the Server](#starting-the-server)
 8. [Shadcn UI Overview](#shadcn-ui-overview)
+
+---
+
+## **Run Locally**
+
+#### *Option 1*: Execute initializer.sh script
+1. Open a terminal in the project directory.
+2. Run the following command to execute the initializer script:
+```bash
+sh initializer.sh
+```
+3. The script will install dependencies, apply migrations, and start the development server.
+4. Open your browser and navigate to http://localhost:3000.
+5. If you encounter a loading issue, refer to the [Handling Initial Loading Issue](#handling-initial-loading-issue) section.
+
+
+#### *Option 2*: Execute commands manually
+1. Open a terminal in the project directory.
+2. Install dependencies:
+```bash
+npm install
+```
+3. Apply migrations and create the database schema:
+```bash
+node src/db/migrations/createTables.js
+```
+4. (Optional) Seed the database with initial sample data:
+```bash
+node src/db/seeds/seedData.js
+```
+5. Start the development server:
+```bash
+npm run dev
+```
+6. Open your browser and navigate to http://localhost:3000.
+7. If you encounter a loading issue, refer to the [Handling Initial Loading Issue](#handling-initial-loading-issue) section.
 
 ---
 
