@@ -25,6 +25,7 @@ import CreateUpdateProject from "@/app/projects/createUpdateProject";
 import CreateUpdateBudget from "@/app/budgets/createUpdateBudget";
 import CreateUpdateExpense from "@/app/expenses/createUpdateExpense";
 import Loading from "@/components/loading";
+import Upload from "@/components/upload";
 
 /**
  * Define headers for project data table.
@@ -285,6 +286,7 @@ export default function HomePage() {
                         expenseData={expenseAllData?.expenses || []}
                     />
 
+                    {activeTab === "overview" && (
                     <div className="flex gap-2 mt-4">
                         <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
                             <DialogTrigger asChild>
@@ -331,6 +333,7 @@ export default function HomePage() {
                             </DialogContent>
                         </Dialog>
                     </div>
+                    )}
 
                     {activeTab === "overview" && (
                         <Overview
@@ -372,6 +375,9 @@ export default function HomePage() {
                             categories={categories}
                             budgets={budgets}
                         />
+                    )}
+                    {activeTab === "upload" && (
+                        <Upload />
                     )}
                 </>
             )}

@@ -32,6 +32,9 @@ export default function TabSelection({
                         <TabsTrigger value="reports" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
                             Reports
                         </TabsTrigger>
+                        <TabsTrigger value="upload" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+                            Upload
+                        </TabsTrigger>
                     </TabsList>
                 </div>
 

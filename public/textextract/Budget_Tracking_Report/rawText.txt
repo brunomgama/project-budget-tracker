@@ -1,0 +1,52 @@
+
+BUDGET TRACKING REPORT
+Report for the period ending: January 2025
+Administered Accounts
+The Budget Tracking System provides an overview of the administered budget accounts,
+detailing the contributions, expenses, and net balance changes over the specified time
+period. This document summarizes the key metrics and changes.
+Account
+Budget
+Contributions/Transfers Expenses
+Net Balance
+Name
+Allocation
+In (€)
+(€)
+(€)
+(€)
+Infrastructure
+75,000.00
+10,000.00
+6,200.00
+78,800.00
+Upgrade
+Client
+30,000.00
+5,000.00
+2,000.00
+33,000.00
+Onboarding
+System
+Internal
+12,000.00
+2,000.00
+3,550.00
+10,450.00
+Training
+Initiative
+Marketing
+55,000.00
+8,000.00
+30,050.00
+32,950.00
+Expansion
+Campaign
+Cybersecurity
+40,000.00
+12,000.00
+9,700.00
+42,300.00
+Enhancement
+Note: This budget tracking report is generated for internal use and provides a snapshot of
+the current budget utilization.
