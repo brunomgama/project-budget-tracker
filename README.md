@@ -67,6 +67,9 @@ npm run dev
 6. Open your browser and navigate to http://localhost:3000.
 7. If you encounter a loading issue, refer to the [Handling Initial Loading Issue](#handling-initial-loading-issue) section.
 
+# Clean Database
+Upon running the initializer.sh script, the database is seeded with sample data. If you wish to start with a clean database, you can delete the file that has been automatically created on /src/db/budget_tracker.db
+
 ---
 
 ## **Database Choice**
