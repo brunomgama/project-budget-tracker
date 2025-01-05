@@ -63,10 +63,12 @@ export async function DELETE(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { name } = body;
+        const { name, managerid } = body;
 
-        if (!name || typeof name !== 'string' || name.trim() === '') {
-            return NextResponse.json({ error: "Invalid or missing project name" }, { status: 400 });
+        console.log(name, managerid);
+
+        if (!name || typeof name !== 'string' || name.trim() === '' || !managerid) {
+            return NextResponse.json({ error: "Invalid or missing fields" }, { status: 400 });
         }
 
         // Check if a project with the same name already exists.
@@ -85,10 +87,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "A project with this name already exists" }, { status: 400 });
         }
 
-        const sql = `INSERT INTO project (name) VALUES (?)`;
+        const sql = `INSERT INTO project (name, managerid) VALUES (?, ?)`;
 
         const result = await new Promise<{ message: string; id: number }>((resolve, reject) => {
-            db.run(sql, [name.trim()], function (this: sqlite3.RunResult, err: { message: string }) {
+            db.run(sql, [name.trim(), managerid], function (this: sqlite3.RunResult, err: { message: string }) {
                 if (err) {
                     console.error("Insert Error:", err.message);
                     reject(err);

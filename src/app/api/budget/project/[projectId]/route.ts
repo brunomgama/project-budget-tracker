@@ -7,11 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ proj
     try {
         const projectId = (await params).projectId
 
-        if (!projectId) {
-            return NextResponse.json({ error: "No Project ID provided" }, { status: 400 });
-        }
-
-        if (isNaN(Number(projectId))) {
+        if (!projectId || isNaN(Number(projectId))) {
             return NextResponse.json({ error: "Invalid Project ID" }, { status: 400 });
         }
 

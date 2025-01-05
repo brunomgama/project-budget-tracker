@@ -3,19 +3,19 @@ import db from '../database.js';
 db.serialize(() => {
     // Insert sample data into Project table
     db.run(`
-        INSERT OR IGNORE INTO project (name) VALUES
-            ('Infrastructure Upgrade'),
-            ('Client Onboarding System'),
-            ('Internal Training Initiative'),
-            ('Marketing Expansion Campaign'),
-            ('Cybersecurity Enhancement');
+        INSERT OR IGNORE INTO project (name, managerid) VALUES
+            ('Infrastructure Upgrade', 1),
+            ('Client Onboarding System', 1),
+            ('Internal Training Initiative', 2),
+            ('Marketing Expansion Campaign', 1),
+            ('Cybersecurity Enhancement', 2);
     `);
 
     // Insert sample data into Manager table
     db.run(`
         INSERT OR IGNORE INTO manager (name) VALUES
-            ('Alice Smith'),
-            ('Bob Johnson'),
+            ('Bruno Gama'),
+            ('Alice Johnson'),
             ('Catherine Lee'),
             ('Daniel Brown');
     `);

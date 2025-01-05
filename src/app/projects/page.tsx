@@ -5,7 +5,7 @@
  * - `useEffect` and `useState` for managing state and side effects.
  * - `SearchBar`, `TableActionButtons`, `Pagination`, and `InfoTable` for UI components.
  */
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 import {APIProjectResponse, Project} from "@/types/interfaces/interface";
 import SearchBar from "@/components/searchbar";
 import TableActionButtons from "@/components/tableactionbuttons";
@@ -19,6 +19,7 @@ import InfoTable from "@/components/infotable";
 const headers = [
     { field: "id", label: "Project Id", type: "number" },
     { field: "name", label: "Name", type: "string" },
+    { field: "managerName", label: "Manager", type: "string" },
 ];
 
 /**
@@ -38,37 +39,58 @@ export default function Projects() {
     const [searchQuery, setSearchQuery] = useState("");
     const itemsPerPage = 15; // Number of items to display per page.
 
-    /**
-     * Fetch project data when the component mounts.
-     * - Calls the `fetchData` function to retrieve data from the API.
-     */
-    useEffect(() => {
-        fetchData();
-    }, []);
+    const fetchManagerName = async (managerId: number): Promise<string> => {
+        try {
+            const response = await fetch(`/api/manager/${managerId}`);
+            const data = await response.json();
+            return data.manager?.name || "Unknown Manager";
+        } catch (error) {
+            console.error(`Error fetching manager name for ID ${managerId}:`, error);
+            return "Unknown Manager";
+        }
+    };
 
     /**
      * Fetch project data from the `/api/project` endpoint.
      * - Updates `data` and `filteredData` states with the fetched projects.
      * - Resets selected items after data is fetched.
      */
-    const fetchData = () => {
-        fetch("/api/project")
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to fetch data");
-                }
-                return response.json();
-            })
-            .then((data: APIProjectResponse) => {
-                setData(data.projects);
-                setFilteredData(data.projects);
-                setSelectedItems(new Set());
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
+    const fetchData = useCallback(async () => {
+        try {
+            const response = await fetch("/api/project");
+            if (!response.ok) {
+                throw new Error("Failed to fetch data");
+            }
+            const data: APIProjectResponse = await response.json();
+
+            const updatedProjects = await Promise.all(
+                data.projects.map(async (project) => {
+                    const managerName = await fetchManagerName(project.managerid);
+                    return { ...project, managerName };
+                })
+            );
+
+            setData(updatedProjects);
+            setFilteredData(updatedProjects);
+            setSelectedItems(new Set());
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error("Error fetching data:", error.message);
                 setError(error.message);
-            });
-    };
+            } else {
+                console.error("Unexpected error:", error);
+                setError("An unexpected error occurred");
+            }
+        }
+    }, []);
+
+    /**
+     * Fetch project data when the component mounts.
+     * - Calls the `fetchData` function to retrieve data from the API.
+     */
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     /**
      * Handle search input to filter the project list.

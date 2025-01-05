@@ -26,6 +26,7 @@ import CreateUpdateBudget from "@/app/budgets/createUpdateBudget";
 import CreateUpdateExpense from "@/app/expenses/createUpdateExpense";
 import Loading from "@/components/loading";
 import Upload from "@/components/upload";
+import {Switch} from "@/components/ui/switch";
 
 /**
  * Define headers for project data table.
@@ -56,9 +57,11 @@ export default function HomePage() {
     const [expenseAllData, setExpenseAllData] = useState<APIExpenseResponse | null>(null);
 
     const itemsPerPage = 10;
-    const totalPages = Math.ceil(data.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+    const [showOnlyManager1, setShowOnlyManager1] = useState(true);
+    const filteredData = showOnlyManager1 ? data.filter((project) => project.managerid === 1) : data;
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
     // Dialog state to handle open/close for project, budget, and expense forms
     const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
@@ -287,52 +290,60 @@ export default function HomePage() {
                     />
 
                     {activeTab === "overview" && (
-                    <div className="flex gap-2 mt-4">
-                        <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                                    <TbLayoutDashboard /> Add Project
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <CreateUpdateProject
-                                    selectedItems={new Set()}
-                                    handleCreateOrUpdate={setIsProjectDialogOpen}
-                                    refreshData={refreshOverviewData}
-                                />
-                            </DialogContent>
-                        </Dialog>
+                        <div className="flex gap-2 mt-4">
+                            <Dialog open={isProjectDialogOpen} onOpenChange={setIsProjectDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                        <TbLayoutDashboard/> Add Project
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <CreateUpdateProject
+                                        selectedItems={new Set()}
+                                        handleCreateOrUpdate={setIsProjectDialogOpen}
+                                        refreshData={refreshOverviewData}
+                                    />
+                                </DialogContent>
+                            </Dialog>
 
-                        <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                                    <TbCurrencyDollar /> Add Budget
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <CreateUpdateBudget
-                                    selectedItems={new Set()}
-                                    handleCreateOrUpdate={setIsBudgetDialogOpen}
-                                    refreshData={refreshOverviewData}
-                                />
-                            </DialogContent>
-                        </Dialog>
+                            <Dialog open={isBudgetDialogOpen} onOpenChange={setIsBudgetDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                        <TbCurrencyDollar/> Add Budget
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <CreateUpdateBudget
+                                        selectedItems={new Set()}
+                                        handleCreateOrUpdate={setIsBudgetDialogOpen}
+                                        refreshData={refreshOverviewData}
+                                    />
+                                </DialogContent>
+                            </Dialog>
 
-                        <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
-                            <DialogTrigger asChild>
-                                <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
-                                    <TbReportMoney /> Add Expense
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <CreateUpdateExpense
-                                    selectedItems={new Set()}
-                                    handleCreateOrUpdate={setIsExpenseDialogOpen}
-                                    refreshData={refreshOverviewData}
-                                />
-                            </DialogContent>
-                        </Dialog>
-                    </div>
+                            <Dialog open={isExpenseDialogOpen} onOpenChange={setIsExpenseDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-indigo-500 hover:bg-indigo-600 text-white">
+                                        <TbReportMoney/> Add Expense
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <CreateUpdateExpense
+                                        selectedItems={new Set()}
+                                        handleCreateOrUpdate={setIsExpenseDialogOpen}
+                                        refreshData={refreshOverviewData}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    checked={showOnlyManager1}
+                                    onCheckedChange={(checked) => setShowOnlyManager1(checked)}
+                                    className="data-[state=checked]:bg-indigo-500" />
+                                <span>{showOnlyManager1 ? "Showing manager projects" : "Showing all projects"}</span>
+                            </div>
+                        </div>
                     )}
 
                     {activeTab === "overview" && (

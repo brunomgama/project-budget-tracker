@@ -21,7 +21,9 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import {useEffect, useState} from "react";
+import {Manager} from "@/types/interfaces/interface";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 /**
  * Define form schema for validation using Zod.
@@ -29,6 +31,7 @@ import { useEffect } from "react";
  */
 const FormSchema = z.object({
     name: z.string().nonempty("Project name is required"),
+    managerId: z.string().nonempty("Manager is required")
 });
 
 /**
@@ -46,12 +49,14 @@ export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdat
     // Check if this is an update operation and get the selected project ID.
     const isUpdate = selectedItems.size > 0;
     const selectedId = isUpdate ? Array.from(selectedItems)[0] : null;
+    const [managers, setManagers] = useState<Manager[]>([]);
 
     // Initialize form with default values and validation schema.
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             name: "",
+            managerId: "",
         },
     });
 
@@ -60,6 +65,17 @@ export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdat
      * - Pre-fills the form with existing project data if an ID is selected.
      */
     useEffect(() => {
+        const fetchManagers = async () => {
+            try {
+                const res = await fetch("/api/manager");
+                const data = await res.json();
+                setManagers(data.managers || []);
+            } catch (error) {
+                console.error("Error fetching managers:", error);
+            }
+        };
+        fetchManagers();
+
         if (isUpdate && selectedId) {
             const fetchProject = async () => {
                 try {
@@ -67,7 +83,10 @@ export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdat
                     const data = await res.json();
 
                     if (res.ok && data.project) {
-                        form.reset({ name: data.project.name });
+                        form.reset({
+                            name: data.project.name,
+                            managerId: data.project.managerid.toString()
+                        });
                     } else {
                         console.error("Failed to fetch project details");
                     }
@@ -94,7 +113,10 @@ export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdat
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ name: data.name }),
+                body: JSON.stringify({
+                    name: data.name,
+                    managerid: Number(data.managerId),
+                }),
             });
 
             const result = await res.json();
@@ -132,6 +154,30 @@ export default function CreateUpdateProject({ selectedItems, handleCreateOrUpdat
                                 <FormLabel>Project Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Enter project name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="managerId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Manager</FormLabel>
+                                <FormControl>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a manager" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {managers.map((manager) => (
+                                                <SelectItem key={manager.id} value={manager.id.toString()}>
+                                                    {manager.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

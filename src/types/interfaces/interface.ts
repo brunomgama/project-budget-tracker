@@ -2,6 +2,7 @@
 export interface Project {
     id: number;
     name: string;
+    managerid: number;
 }
 
 // Interface for the API response containing a list of projects.

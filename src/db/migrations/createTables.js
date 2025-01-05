@@ -6,7 +6,9 @@ db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS project (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
+        name TEXT NOT NULL,
+        managerid INTEGER NOT NULL,
+        FOREIGN KEY (managerid) REFERENCES manager (id) ON DELETE RESTRICT
         );
     `);
 
